@@ -1,0 +1,554 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Windows 11 Clone</title>
+    <link rel="stylesheet" href="styles.css">
+    <script type="importmap">
+        {
+            "imports": {
+                "sortablejs": "https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+</head>
+<body>
+    <div class="desktop">
+        <!-- Desktop Icons -->
+        <div class="desktop-icons">
+            <div class="icon" data-name="Recycle Bin">
+                <svg viewBox="0 0 24 24" class="icon-svg">
+                    <path d="M9,3V4H4V6H5V19A2,2 0 0,0 7,21H17A2,2 0 0,0 19,19V6H20V4H15V3H9M7,6H17V19H7V6M9,8V17H11V8H9M13,8V17H15V8H13Z" fill="currentColor"/>
+                </svg>
+                <span>Recycle Bin</span>
+            </div>
+            <div class="icon" data-name="File Explorer">
+                <svg viewBox="0 0 24 24" class="icon-svg">
+                    <path d="M20,18H4V8H20M20,6H12L10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6Z" fill="currentColor"/>
+                </svg>
+                <span>File Explorer</span>
+            </div>
+            <div class="icon" data-name="Edge">
+                <svg viewBox="0 0 24 24" class="icon-svg">
+                    <path d="M21.86,12.5C21.1,11.63 20.15,11.13 19,11C19,10.43 19,9.5 19,9A7,7 0 0,0 12,2A7,7 0 0,0 5,9C5,9.5 5,10.43 5,11C3.85,11.13 2.9,11.63 2.14,12.5C1.2,13.57 1.14,15.22 1.96,16.43C2.79,17.64 4.4,18 5.5,17.71C6.5,17.43 7,16.85 7,16V11.95C7,11.43 7.43,11 7.95,11H16.05C16.57,11 17,11.43 17,11.95V16C17,16.85 17.5,17.43 18.5,17.71C19.6,18 21.21,17.64 22.04,16.43C22.86,15.22 22.8,13.57 21.86,12.5Z" fill="currentColor"/>
+                </svg>
+                <span>Edge</span>
+            </div>
+        </div>
+
+        <!-- Taskbar -->
+        <div class="taskbar">
+            <div class="taskbar-left">
+                <button class="start-button" id="startButton">
+                    <svg viewBox="0 0 24 24" class="windows-icon">
+                        <path d="M3,12V6.75L9,5.43V11.91L3,12M20,3V11.75L10,11.9V5.21L20,3M3,13L9,13.09V19.9L3,18.75V13M12,19.96C11.17,18.76 10.5,17.43 10.09,16H13.91C13.5,17.43 12.83,18.76 12,19.96M8,8H5.08C6.03,6.34 7.57,5.06 9.4,4.44C8.8,5.55 8.35,6.75 8,8M5.08,16H8C8.35,17.25 8.8,18.45 9.4,19.56C7.57,18.93 6.03,17.65 5.08,16M4.26,14C4.1,13.36 4,12.69 4,12C4,11.31 4.1,10.64 4.26,10H7.64C7.56,10.66 7.5,11.32 7.5,12C7.5,12.68 7.56,13.34 7.64,14M12,4.03C12.83,5.23 13.5,6.57 13.91,8H10.09C10.5,6.57 11.17,5.23 12,4.03M18.92,8H15.97C15.65,6.75 15.19,5.55 14.59,4.44C16.43,5.07 17.96,6.34 18.92,8M12,2C6.47,2 2,6.5 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z" fill="currentColor"/>
+                    </svg>
+                </button>
+                <div class="search-button">
+                    <svg viewBox="0 0 24 24" class="search-icon">
+                        <path d="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z" fill="currentColor"/>
+                    </svg>
+                </div>
+                <div class="taskbar-icons" id="taskbarIcons">
+                    <div class="taskbar-icon active">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M20,18H4V8H20M20,6H12L10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6Z" fill="currentColor"/>
+                        </svg>
+                    </div>
+                    <div class="taskbar-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M16.36,14C16.44,13.34 16.5,12.68 16.5,12C16.5,11.32 16.44,10.66 16.36,10H19.74C19.9,10.64 20,11.31 20,12C20,12.69 19.9,13.36 19.74,14M14.59,19.56C15.19,18.45 15.65,17.25 15.97,16H18.92C17.96,17.65 16.43,18.93 14.59,19.56M14.34,14H9.66C9.56,13.34 9.5,12.68 9.5,12C9.5,11.32 9.56,10.65 9.66,10H14.34C14.43,10.65 14.5,11.32 14.5,12C14.5,12.68 14.43,13.34 14.34,14M12,19.96C11.17,18.76 10.5,17.43 10.09,16H13.91C13.5,17.43 12.83,18.76 12,19.96M8,8H5.08C6.03,6.34 7.57,5.06 9.4,4.44C8.8,5.55 8.35,6.75 8,8M5.08,16H8C8.35,17.25 8.8,18.45 9.4,19.56C7.57,18.93 6.03,17.65 5.08,16M4.26,14C4.1,13.36 4,12.69 4,12C4,11.31 4.1,10.64 4.26,10H7.64C7.56,10.66 7.5,11.32 7.5,12C7.5,12.68 7.56,13.34 7.64,14M12,4.03C12.83,5.23 13.5,6.57 13.91,8H10.09C10.5,6.57 11.17,5.23 12,4.03M18.92,8H15.97C15.65,6.75 15.19,5.55 14.59,4.44C16.43,5.07 17.96,6.34 18.92,8M12,2C6.47,2 2,6.5 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z" fill="currentColor"/>
+                    </svg>
+                </div>
+                <div class="taskbar-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M21.86,12.5C21.1,11.63 20.15,11.13 19,11C19,10.43 19,9.5 19,9A7,7 0 0,0 12,2A7,7 0 0,0 5,9C5,9.5 5,10.43 5,11C3.85,11.13 2.9,11.63 2.14,12.5C1.2,13.57 1.14,15.22 1.96,16.43C2.79,17.64 4.4,18 5.5,17.71C6.5,17.43 7,16.85 7,16V11.95C7,11.43 7.43,11 7.95,11H16.05C16.57,11 17,11.43 17,11.95V16C17,16.85 17.5,17.43 18.5,17.71C19.6,18 21.21,17.64 22.04,16.43C22.86,15.22 22.8,13.57 21.86,12.5Z" fill="currentColor"/>
+                    </svg>
+                </div>
+                <div class="taskbar-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M20,18H4V8H20M20,6H12L10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6Z" fill="currentColor"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="taskbar-right">
+        <div class="weather-info" id="weatherInfo">
+            <span class="temperature" id="temperature">--°</span>
+            <span class="location" id="location">Loading...</span>
+        </div>
+        <div class="system-tray">
+            <span class="time" id="time">10:30 AM</span>
+            <span class="date" id="date">5/1/2023</span>
+            <div class="notification-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M21,19V20H3V19L5,17V11C5,7.9 7.03,5.17 10,4.29C10,4.19 10,4.1 10,4A2,2 0 0,1 12,2A2,2 0 0,1 14,4C14,4.1 14,4.19 14,4.29C16.97,5.17 19,7.9 19,11V17L21,19M14,21A2,2 0 0,1 12,23A2,2 0 0,1 10,21H14M19.35,10.03C18.67,6.59 15.64,4 12,4C9.11,4 6.6,5.64 5.35,8.03C2.34,8.36 0,10.9 0,14A6,6 0 0,0 6,20H19A5,5 0 0,0 24,15C24,12.36 21.95,10.22 19.35,10.03Z" fill="currentColor"/>
+                </svg>
+            </div>
+            <div class="wifi-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12,21L15.6,16.2C14.6,15.45 13.35,15 12,15C10.65,15 9.4,15.45 8.4,16.2L12,21M20,3V11.75L10,11.9V5.21L20,3M3,13L9,13.09V19.9L3,18.75V13M12,3C7.95,3 4.21,4.34 1.2,6.6L3,9C5.5,7.12 8.62,6 12,6C15.38,6 18.5,7.12 21,9L22.8,6.6C19.79,4.34 16.05,3 12,3M12,9C9.3,9 6.81,9.89 4.8,11.4L6.6,13.8C8.1,12.67 9.97,12 12,12C14.03,12 15.9,12.67 17.4,13.8L19.2,11.4C17.19,9.89 14.7,9 12,9Z" fill="currentColor"/>
+                </svg>
+            </div>
+            <div class="volume-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M14,3.23V5.29C16.89,6.15 19,8.83 19,12C19,15.17 16.89,17.84 14,18.7V20.77C18,19.86 21,16.28 21,12C21,7.72 18,4.14 14,3.23M16.5,12C16.5,10.23 15.5,8.71 14,7.97V16C15.5,15.29 16.5,13.76 16.5,12M3,9V15H7L12,20V4L7,9H3Z" fill="currentColor"/>
+                </svg>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Start Menu -->
+<div class="start-menu" id="startMenu">
+    <div class="start-header">
+        <div class="pinned-apps-header">Pinned</div>
+        <button class="all-apps-button">All apps</button>
+    </div>
+    <div class="pinned-apps">
+        <div class="app-item">
+            <svg viewBox="0 0 24 24">
+                <path d="M21.86,12.5C21.1,11.63 20.15,11.13 19,11C19,10.43 19,9.5 19,9A7,7 0 0,0 12,2A7,7 0 0,0 5,9C5,9.5 5,10.43 5,11C3.85,11.13 2.9,11.63 2.14,12.5C1.2,13.57 1.14,15.22 1.96,16.43C2.79,17.64 4.4,18 5.5,17.71C6.5,17.43 7,16.85 7,16V11.95C7,11.43 7.43,11 7.95,11H16.05C16.57,11 17,11.43 17,11.95V16C17,16.85 17.5,17.43 18.5,17.71C19.6,18 21.21,17.64 22.04,16.43C22.86,15.22 22.8,13.57 21.86,12.5Z" fill="#0078D7"/>
+            </svg>
+            <span>Edge</span>
+        </div>
+        <div class="app-item">
+            <svg viewBox="0 0 24 24">
+                <path d="M20,18H4V8H20M20,6H12L10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6Z" fill="#FFB900"/>
+            </svg>
+            <span>File Explorer</span>
+        </div>
+        <div class="app-item">
+            <svg viewBox="0 0 24 24">
+                <path d="M19,18H6A4,4 0 0,1 2,14A4,4 0 0,1 6,10H6.71C7.37,7.69 9.5,6 12,6A5.5,5.5 0 0,1 17.5,11.5V12H19A3,3 0 0,1 22,15A3,3 0 0,1 19,18M14,21A2,2 0 0,1 12,23A2,2 0 0,1 10,21H14M19.35,10.03C18.67,6.59 15.64,4 12,4C9.11,4 6.6,5.64 5.35,8.03C2.34,8.36 0,10.9 0,14A6,6 0 0,0 6,20H19A5,5 0 0,0 24,15C24,12.36 21.95,10.22 19.35,10.03Z" fill="#0078D7"/>
+            </svg>
+            <span>OneDrive</span>
+        </div>
+        <div class="app-item">
+            <svg viewBox="0 0 24 24">
+                <path d="M14,10H19.5L14,4.5V10M5,3H15L21,9V19A2,2 0 0,1 19,21H5C3.89,21 3,20.1 3,19V5C3,3.89 3.89,3 5,3M5,5V19H19V12H12V5H5Z" fill="#00A4EF"/>
+            </svg>
+            <span>Word</span>
+        </div>
+        <div class="app-item">
+            <svg viewBox="0 0 24 24">
+                <path d="M21.17 3.25Q21.5 3.25 21.76 3.5 22 3.74 22 4.08V19.92Q22 20.26 21.76 20.5 21.5 20.75 21.17 20.75H7.83Q7.5 20.75 7.24 20.5 7 20.26 7 19.92V17H2.83Q2.5 17 2.24 16.76 2 16.5 2 16.17V7.83Q2 7.5 2.24 7.24 2.5 7 2.83 7H7V4.08Q7 3.74 7.24 3.5 7.5 3.25 7.83 3.25M7.83 7H12.17Q12.5 7 12.76 7.24 13 7.5 13 7.83V16.17Q13 16.5 12.76 16.76 12.5 17 12.17 17H7.83V19.08Q7.83 19.08 7.83 19.08 7.83 19.08 7.83 19.08H21.17Q21.17 19.08 21.17 19.08 21.17 19.08 21.17 19.08V4.92Q21.17 4.92 21.17 4.92 21.17 4.92 21.17 4.92H7.83Q7.83 4.92 7.83 4.92 7.83 4.92 7.83 4.92M3.83 8.08V15.92H12.17Q12.17 15.92 12.17 15.92 12.17 15.92 12.17 15.92V8.08Q12.17 8.08 12.17 8.08 12.17 8.08 12.17 8.08Z" fill="#107C41"/>
+            </svg>
+            <span>Excel</span>
+        </div>
+        <div class="app-item">
+            <svg viewBox="0 0 24 24">
+                <path d="M15.83,19.73L8.10,19.76L3.33,14.50L8.38,8.26L22.84,8.22L15.83,19.73M21.17,20.00L23.00,16.50L20.67,10.00L15.33,10.00L15.67,9.33L20.67,9.33L16.18,2.67L8.50,2.67L2.67,9.00L8.50,15.67L15.67,15.67L17.33,14.67L21.17,20.00Z" fill="#FF8C00"/>
+            </svg>
+            <span>PowerPoint</span>
+        </div>
+        <div class="app-item" id="settingsApp">
+            <svg viewBox="0 0 24 24">
+                <path d="M3,5H9V11H3V5M5,7V9H7V7H5M11,7H21V9H11V7M11,15H21V17H11V15M5,13V15H7V13H5M3,13H9V19H3V13Z" fill="#0078D7"/>
+            </svg>
+            <span>Settings</span>
+        </div>
+        <div class="app-item">
+            <svg viewBox="0 0 24 24">
+                <path d="M3,5H9V11H3V5M5,7V9H7V7H5M11,7H21V9H11V7M11,15H21V17H11V15M5,13V15H7V13H5M3,13H9V19H3V13Z" fill="#7F7F7F"/>
+            </svg>
+            <span>Store</span>
+        </div>
+    </div>
+    <div class="recommended-section">
+        <div class="recommended-header">Recommended</div>
+        <div class="recommended-items">
+            <div class="recommended-item">
+                <svg viewBox="0 0 24 24">
+                    <path d="M14,10H19.5L14,4.5V10M5,3H15L21,9V19A2,2 0 0,1 19,21H5C3.89,21 3,20.1 3,19V5C3,3.89 3.89,3 5,3M5,5V19H19V12H12V5H5Z" fill="#00A4EF"/>
+                </svg>
+                <div>
+                    <span class="rec-title">Document1.docx</span>
+                    <span class="rec-info">Modified 2 hours ago</span>
+                </div>
+            </div>
+            <div class="recommended-item">
+                <svg viewBox="0 0 24 24">
+                    <path d="M21.17 3.25Q21.5 3.25 21.76 3.5 22 3.74 22 4.08V19.92Q22 20.26 21.76 20.5 21.5 20.75 21.17 20.75H7.83Q7.5 20.75 7.24 20.5 7 20.26 7 19.92V17H2.83Q2.5 17 2.24 16.76 2 16.5 2 16.17V7.83Q2 7.5 2.24 7.24 2.5 7 2.83 7H7V4.08Q7 3.74 7.24 3.5 7.5 3.25 7.83 3.25M7.83 7H12.17Q12.5 7 12.76 7.24 13 7.5 13 7.83V16.17Q13 16.5 12.76 16.76 12.5 17 12.17 17H7.83V19.08Q7.83 19.08 7.83 19.08 7.83 19.08 7.83 19.08H21.17Q21.17 19.08 21.17 19.08 21.17 19.08 21.17 19.08V4.92Q21.17 4.92 21.17 4.92 21.17 4.92 21.17 4.92H7.83Q7.83 4.92 7.83 4.92 7.83 4.92 7.83 4.92M3.83 8.08V15.92H12.17Q12.17 15.92 12.17 15.92 12.17 15.92 12.17 15.92V8.08Q12.17 8.08 12.17 8.08 12.17 8.08 12.17 8.08Z" fill="#107C41"/>
+                </svg>
+                <div>
+                    <span class="rec-title">Budget2023.xlsx</span>
+                    <span class="rec-info">Modified yesterday</span>
+                </div>
+            </div>
+            <div class="recommended-item">
+                <svg viewBox="0 0 24 24">
+                    <path d="M15.83,19.73L8.10,19.76L3.33,14.50L8.38,8.26L22.84,8.22L15.83,19.73M21.17,20.00L23.00,16.50L20.67,10.00L15.33,10.00L15.67,9.33L20.67,9.33L16.18,2.67L8.50,2.67L2.67,9.00L8.50,15.67L15.67,15.67L17.33,14.67L21.17,20.00Z" fill="#FF8C00"/>
+                </svg>
+                <div>
+                    <span class="rec-title">Presentation.pptx</span>
+                    <span class="rec-info">Modified 3 days ago</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="start-footer">
+        <div class="user-profile" id="userProfile">
+            <div class="profile-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z" fill="currentColor"/>
+                </svg>
+            </div>
+            <span>User</span>
+        </div>
+        <div class="user-menu" id="userMenu">
+            <div class="user-menu-item">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z" fill="currentColor"/>
+                </svg>
+                <span>Change account settings</span>
+            </div>
+            <div class="user-menu-item">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M7.07,18.28C7.5,17.38 10.12,16.5 12,16.5C13.88,16.5 16.5,17.38 16.93,18.28C15.57,19.36 13.86,20 12,20C10.14,20 8.43,19.36 7.07,18.28M18.36,16.83C16.93,15.09 13.46,14.5 12,14.5C10.54,14.5 7.07,15.09 5.64,16.83C4.62,15.5 4,13.82 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,13.82 19.38,15.5 18.36,16.83M12,6C10.06,6 8.5,7.56 8.5,9.5C8.5,11.44 10.06,13 12,13C13.94,13 15.5,11.44 15.5,9.5C15.5,7.56 13.94,6 12,6M12,11C11.17,11 10.5,10.33 10.5,9.5C10.5,8.67 11.17,8 12,8C12.83,8 13.5,8.67 13.5,9.5C13.5,10.33 12.83,11 12,11Z" fill="currentColor"/>
+                </svg>
+                <span>Manage accounts</span>
+            </div>
+            <div class="user-menu-item" id="lockAccount">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12,17A2,2 0 0,0 14,15C14,13.89 13.1,13 12,13A2,2 0 0,0 10,15A2,2 0 0,0 12,17M18,8A2,2 0 0,1 20,10V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V10C4,8.89 4.9,8 6,8H7V6A5,5 0 0,1 12,1A5,5 0 0,1 17,6V8H18M12,3A3,3 0 0,0 9,6V8H15V6A3,3 0 0,0 12,3Z" fill="currentColor"/>
+                </svg>
+                <span>Lock</span>
+            </div>
+            <div class="user-menu-item" id="signOut">
+                <svg viewBox="0 0 24 24">
+                    <path d="M16,17V14H9V10H16V7L21,12L16,17M14,21A2,2 0 0,1 12,23A2,2 0 0,1 10,21H14M19.35,10.03C18.67,6.59 15.64,4 12,4C9.11,4 6.6,5.64 5.35,8.03C2.34,8.36 0,10.9 0,14A6,6 0 0,0 6,20H19A5,5 0 0,0 24,15C24,12.36 21.95,10.22 19.35,10.03Z" fill="currentColor"/>
+                </svg>
+                <span>Sign out</span>
+            </div>
+        </div>
+        <div class="power-button">
+            <svg viewBox="0 0 24 24">
+                <path d="M16.56,5.44L15.11,6.89C16.84,7.94 18,9.83 18,12A6,6 0 0,1 12,18A6,6 0 0,1 6,12C6,9.83 7.16,7.94 8.88,6.88L7.44,5.44C5.36,6.88 4,9.28 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12C20,9.28 18.64,6.88 16.56,5.44M13,3H11V13H13" fill="currentColor"/>
+            </svg>
+        </div>
+        <div class="power-menu" id="powerMenu">
+            <div class="power-menu-item" id="powerOff">
+                <svg viewBox="0 0 24 24">
+                    <path d="M16.56,5.44L15.11,6.89C16.84,7.94 18,9.83 18,12A6,6 0 0,1 12,18A6,6 0 0,1 6,12C6,9.83 7.16,7.94 8.88,6.88L7.44,5.44C5.36,6.88 4,9.28 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12C20,9.28 18.64,6.88 16.56,5.44M13,3H11V13H13" fill="currentColor"/>
+                </path>
+                <span>Power off</span>
+            </div>
+            <div class="power-menu-item" id="restart">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12,4C14.1,4 16.1,4.8 17.6,6.3C20.7,9.4 20.7,14.5 17.6,17.6C15.8,19.5 13.3,20.2 10.9,19.9L11.4,17.9C13.1,18.1 14.9,17.5 16.2,16.2C18.5,13.9 18.5,10.1 16.2,7.7C15.1,6.6 13.5,6 12,6V10.6L7,5.6L12,0.6V4M6.3,17.6C3.7,15 3.3,11 5.1,7.9L6.6,9.4C5.5,11.6 5.9,14.4 7.8,16.2C8.3,16.7 8.9,17.1 9.6,17.4L9,19.4C8,19 7.1,18.4 6.3,17.6Z" fill="currentColor"/>
+                </svg>
+                <span>Restart</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- File Explorer Window -->
+<div class="window" id="fileExplorer">
+    <div class="window-header">
+        <div class="window-title">
+            <svg viewBox="0 0 24 24" class="window-icon">
+                <path d="M20,18H4V8H20M20,6H12L10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6Z" fill="currentColor"/>
+            </svg>
+            <span>File Explorer</span>
+        </div>
+        <div class="window-controls">
+            <button class="minimize">&#8211;</button>
+            <button class="maximize">&#9744;</button>
+            <button class="close">&#10005;</button>
+        </div>
+    </div>
+    <div class="window-toolbar">
+        <div class="toolbar-actions">
+            <button class="toolbar-button">
+                <svg viewBox="0 0 24 24">
+                    <path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z" fill="currentColor"/>
+                </svg>
+            </button>
+            <button class="toolbar-button">
+                <svg viewBox="0 0 24 24">
+                    <path d="M4,11V13H16L10.5,18.5L11.92,19.92L19.84,12L11.92,4.08L10.5,5.5L16,11H4Z" fill="currentColor"/>
+                </svg>
+            </button>
+            <button class="toolbar-button">
+                <svg viewBox="0 0 24 24">
+                    <path d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z" fill="currentColor"/>
+                </svg>
+            </button>
+        </div>
+        <div class="address-bar">
+            <div class="breadcrumb">
+                <span>This PC</span>
+                <span>&gt;</span>
+                <span>Documents</span>
+            </div>
+        </div>
+        <div class="search-box">
+            <svg viewBox="0 0 24 24">
+                <path d="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z" fill="currentColor"/>
+            </svg>
+            <input type="text" placeholder="Search Documents">
+        </div>
+    </div>
+    <div class="window-content">
+        <div class="sidebar">
+            <div class="sidebar-section">
+                <div class="sidebar-header">Quick access</div>
+                <div class="sidebar-item">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 19.47,11.34 19.43,11L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.96 19.05,5.05L16.56,6.05C16.04,5.66 15.5,5.32 14.87,5.07L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.5,2.42L9.13,5.07C8.5,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.21,8.95 2.27,9.22 2.46,9.37L4.57,11C4.53,11.34 4.5,11.67 4.5,12C4.5,12.33 4.53,12.65 4.57,12.97L2.46,14.63C2.27,14.78 2.21,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,18.95L7.44,17.94C7.96,18.34 8.5,18.68 9.13,18.93L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.5,21.58L14.87,18.93C15.5,18.67 16.04,18.34 16.56,17.94L19.05,18.95C19.27,19.03 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z" fill="currentColor"/>
+                </svg>
+                <span>Desktop</span>
+            </div>
+            <div class="sidebar-item">
+                <svg viewBox="0 0 24 24">
+                    <path d="M10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6H12L10,4Z" fill="currentColor"/>
+                </svg>
+                <span>Downloads</span>
+            </div>
+            <div class="sidebar-item">
+                <svg viewBox="0 0 24 24">
+                    <path d="M13,9H18.5L13,3.5V9M6,2H14L20,8V20A2,2 0 0,1 18,22H6C4.89,22 4,21.1 4,20V4C4,2.89 4.89,2 6,2M5,5V19H19V12H12V5H5Z" fill="currentColor"/>
+                </svg>
+                <span>Documents</span>
+            </div>
+            <div class="sidebar-item">
+                <svg viewBox="0 0 24 24">
+                    <path d="M21,17H7V3H21M21,1H7A2,2 0 0,0 5,3V21A2,2 0 0,0 7,23H21A2,2 0 0,0 23,21V3A2,2 0 0,0 21,1M3,5H1V21A2,2 0 0,0 3,23H19A2,2 0 0,0 21,21V5L3,5Z" fill="currentColor"/>
+                </svg>
+                <span>Pictures</span>
+            </div>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-header">This PC</div>
+            <div class="sidebar-item">
+                <svg viewBox="0 0 24 24">
+                    <path d="M6,2H18A2,2 0 0,1 20,4V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V4A2,2 0 0,1 6,2M12,4A6,6 0 0,0 6,10C6,12.97 8.16,15.43 11,15.92V18H13V15.92C15.84,15.43 18,12.97 18,10A6,6 0 0,0 12,4M12,6A4,4 0 0,1 16,10A4,4 0 0,1 12,14A4,4 0 0,1 8,10A4,4 0 0,1 12,6Z" fill="currentColor"/>
+                </svg>
+                <span>Local Disk (C:)</span>
+            </div>
+            <div class="sidebar-item">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 19.47,11.34 19.43,11L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.96 19.05,5.05L16.56,6.05C16.04,5.66 15.5,5.32 14.87,5.07L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.5,2.42L9.13,5.07C8.5,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.21,8.95 2.27,9.22 2.46,9.37L4.57,11C4.53,11.34 4.5,11.67 4.5,12C4.5,12.33 4.53,12.65 4.57,12.97L2.46,14.63C2.27,14.78 2.21,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,18.95L7.44,17.94C7.96,18.34 8.5,18.68 9.13,18.93L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.5,21.58L14.87,18.93C15.5,18.67 16.04,18.34 16.56,17.94L19.05,18.95C19.27,19.03 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z" fill="currentColor"/>
+                </svg>
+                <span>Network</span>
+            </div>
+        </div>
+    </div>
+    <div class="file-content">
+        <div class="file-item folder">
+            <svg viewBox="0 0 24 24">
+                <path d="M10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6H12L10,4Z" fill="currentColor"/>
+            </svg>
+            <span>Personal</span>
+        </div>
+        <div class="file-item folder">
+            <svg viewBox="0 0 24 24">
+                <path d="M10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6H12L10,4Z" fill="currentColor"/>
+            </svg>
+            <span>Work</span>
+        </div>
+        <div class="file-item document">
+            <svg viewBox="0 0 24 24">
+                <path d="M14,10H19.5L14,4.5V10M5,3H15L21,9V19A2,2 0 0,1 19,21H5C3.89,21 3,20.1 3,19V5C3,3.89 3.89,3 5,3M5,5V19H19V12H12V5H5Z" fill="#00A4EF"/>
+            </svg>
+            <span>Report.docx</span>
+        </div>
+        <div class="file-item spreadsheet">
+            <svg viewBox="0 0 24 24">
+                <path d="M21.17 3.25Q21.5 3.25 21.76 3.5 22 3.74 22 4.08V19.92Q22 20.26 21.76 20.5 21.5 20.75 21.17 20.75H7.83Q7.5 20.75 7.24 20.5 7 20.26 7 19.92V17H2.83Q2.5 17 2.24 16.76 2 16.5 2 16.17V7.83Q2 7.5 2.24 7.24 2.5 7 2.83 7H7V4.08Q7 3.74 7.24 3.5 7.5 3.25 7.83 3.25M7.83 7H12.17Q12.5 7 12.76 7.24 13 7.5 13 7.83V16.17Q13 16.5 12.76 16.76 12.5 17 12.17 17H7.83V19.08Q7.83 19.08 7.83 19.08 7.83 19.08 7.83 19.08H21.17Q21.17 19.08 21.17 19.08 21.17 19.08 21.17 19.08V4.92Q21.17 4.92 21.17 4.92 21.17 4.92 21.17 4.92H7.83Q7.83 4.92 7.83 4.92 7.83 4.92 7.83 4.92M3.83 8.08V15.92H12.17Q12.17 15.92 12.17 15.92 12.17 15.92 12.17 15.92V8.08Q12.17 8.08 12.17 8.08 12.17 8.08 12.17 8.08Z" fill="#107C41"/>
+            </svg>
+            <span>Budget.xlsx</span>
+        </div>
+        <div class="file-item presentation">
+            <svg viewBox="0 0 24 24">
+                <path d="M15.83,19.73L8.10,19.76L3.33,14.50L8.38,8.26L22.84,8.22L15.83,19.73M21.17,20.00L23.00,16.50L20.67,10.00L15.33,10.00L15.67,9.33L20.67,9.33L16.18,2.67L8.50,2.67L2.67,9.00L8.50,15.67L15.67,15.67L17.33,14.67L21.17,20.00Z" fill="#FF8C00"/>
+            </svg>
+            <span>Presentation.pptx</span>
+        </div>
+        <div class="file-item pdf">
+            <svg viewBox="0 0 24 24">
+                <path d="M12,10.5H13V13.5H12V10.5M7,11.5H8V10.5H7V11.5M20,6V18A2,2 0 0,1 18,20H6A2,2 0 0,1 4,18V6A2,2 0 0,1 6,4H18A2,2 0 0,1 20,6M9.5,10.5A1.5,1.5 0 0,0 8,9H5.5V15H7V13H8A1.5,1.5 0 0,0 9.5,11.5V10.5M14.5,10.5A1.5,1.5 0 0,0 13,9H10.5V15H13A1.5,1.5 0 0,0 14.5,13.5V10.5M18.5,9H15.5V15H17V13H18.5V11.5H17V10.5H18.5V9Z" fill="#FF0000"/>
+            </svg>
+            <span>Manual.pdf</span>
+        </div>
+    </div>
+</div>
+<div class="window-status-bar">
+    <span>6 items</span>
+    <span>3.24 GB free of 256 GB</span>
+</div>
+</div>
+<div class="window" id="edgeWindow">
+    <div class="window-header">
+        <div class="window-title">
+            <svg viewBox="0 0 24 24" class="window-icon">
+                <path d="M21.86,12.5C21.1,11.63 20.15,11.13 19,11C19,10.43 19,9.5 19,9A7,7 0 0,0 12,2A7,7 0 0,0 5,9C5,9.5 5,10.43 5,11C3.85,11.13 2.9,11.63 2.14,12.5C1.2,13.57 1.14,15.22 1.96,16.43C2.79,17.64 4.4,18 5.5,17.71C6.5,17.43 7,16.85 7,16V11.95C7,11.43 7.43,11 7.95,11H16.05C16.57,11 17,11.43 17,11.95V16C17,16.85 17.5,17.43 18.5,17.71C19.6,18 21.21,17.64 22.04,16.43C22.86,15.22 22.8,13.57 21.86,12.5Z" fill="currentColor"/>
+            </svg>
+            <span>Microsoft Edge</span>
+        </div>
+        <div class="window-controls">
+            <button class="minimize">&#8211;</button>
+            <button class="maximize">&#9744;</button>
+            <button class="close">&#10005;</button>
+        </div>
+    </div>
+    <div class="window-content">
+        <iframe id="edgeIframe" src="https://www.bing.com" frameborder="0"></iframe>
+    </div>
+</div>
+
+<!-- Settings Window -->
+<div class="window" id="settingsWindow">
+    <div class="window-header">
+        <div class="window-title">
+            <svg viewBox="0 0 24 24" class="window-icon">
+                <path d="M3,5H9V11H3V5M5,7V9H7V7H5M11,7H21V9H11V7M11,15H21V17H11V15M5,13V15H7V13H5M3,13H9V19H3V13Z" fill="currentColor"/>
+            </svg>
+            <span>Settings</span>
+        </div>
+        <div class="window-controls">
+            <button class="minimize">&#8211;</button>
+            <button class="maximize">&#9744;</button>
+            <button class="close">&#10005;</button>
+        </div>
+    </div>
+    <div class="settings-content">
+        <div class="settings-sidebar">
+            <div class="settings-nav-item active">
+                <svg viewBox="0 0 24 24"><path d="M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 19.47,11.34 19.43,11L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.96 19.05,5.05L16.56,6.05C16.04,5.66 15.5,5.32 14.87,5.07L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.5,2.42L9.13,5.07C8.5,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.21,8.95 2.27,9.22 2.46,9.37L4.57,11C4.53,11.34 4.5,11.67 4.5,12C4.5,12.33 4.53,12.65 4.57,12.97L2.46,14.63C2.27,14.78 2.21,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,18.95L7.44,17.94C7.96,18.34 8.5,18.68 9.13,18.93L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.5,21.58L14.87,18.93C15.5,18.67 16.04,18.34 16.56,17.94L19.05,18.95C19.27,19.03 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z" fill="currentColor"/></svg>
+                <span>System</span>
+            </div>
+            <div class="settings-nav-item">
+                <svg viewBox="0 0 24 24"><path d="M17,1H7A2,2 0 0,0 5,3V21A2,2 0 0,0 7,23H17A2,2 0 0,0 19,21V3A2,2 0 0,0 17,1M17,19H7V5H17V19M10,10V8H14V10H10M10,12V14H14V12H10Z" fill="currentColor"/></svg>
+                <span>Devices</span>
+            </div>
+            <div class="settings-nav-item">
+                <svg viewBox="0 0 24 24"><path d="M12,11A1,1 0 0,0 11,12A1,1 0 0,0 12,13A1,1 0 0,0 13,12A1,1 0 0,0 12,11M12,16.5C9.5,16.5 7.5,14.5 7.5,12C7.5,9.5 9.5,7.5 12,7.5C14.5,7.5 16.5,9.5 16.5,12C16.5,14.5 14.5,16.5 12,16.5M3,5H1V21A2,2 0 0,0 3,23H19A2,2 0 0,0 21,21V5L3,5Z" fill="currentColor"/></svg>
+                <span>Network</span>
+            </div>
+            <div class="settings-nav-item">
+                <svg viewBox="0 0 24 24"><path d="M20,2H4C2.89,2 2,4.89 2,6V22L6,18H20A2,2 0 0,0 22,16V4A2,2 0 0,0 20,2M6,9H18V11H6M14,14H6V12H14M18,8H6V6H18" fill="currentColor"/></svg>
+                <span>Personalization</span>
+            </div>
+            <div class="settings-nav-item">
+                <svg viewBox="0 0 24 24"><path d="M21,11C21,16.55 17.16,21.74 12,23C6.84,21.74 3,16.55 3,11V5L12,1L21,5V11M12,21A2,2 0 0,1 10,23A2,2 0 0,1 8,21H14M19.35,10.03C18.67,6.59 15.64,4 12,4C9.11,4 6.6,5.64 5.35,8.03C2.34,8.36 0,10.9 0,14A6,6 0 0,0 6,20H19A5,5 0 0,0 24,15C24,12.36 21.95,10.22 19.35,10.03Z" fill="currentColor"/></svg>
+                <span>Privacy</span>
+            </div>
+            <div class="settings-nav-item">
+                <svg viewBox="0 0 24 24"><path d="M10,17L6,13L7.41,11.59L10,14.17L16.59,7.58L18,9M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1Z" fill="currentColor"/></svg>
+                <span>Update & Security</span>
+            </div>
+        </div>
+        <div class="settings-main">
+            <h2>System Settings</h2>
+            <div class="settings-group">
+                <h3>Display</h3>
+                <div class="settings-item">
+                    <div>
+                        <div class="settings-item-title">Brightness and color</div>
+                        <div class="settings-item-desc">Adjust brightness level and color settings</div>
+                    </div>
+                    <div class="settings-control">
+                        <input type="range" min="0" max="100" value="70">
+                    </div>
+                </div>
+                <div class="settings-item">
+                    <div>
+                        <div class="settings-item-title">Night light</div>
+                        <div class="settings-item-desc">Reduce blue light emitted from your screen</div>
+                    </div>
+                    <div class="settings-control">
+                        <label class="toggle">
+                            <input type="checkbox">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="settings-group">
+                <h3>Sound</h3>
+                <div class="settings-item">
+                    <div>
+                        <div class="settings-item-title">Volume</div>
+                        <div class="settings-item-desc">Adjust system volume</div>
+                    </div>
+                    <div class="settings-control">
+                        <input type="range" min="0" max="100" value="50">
+                    </div>
+                </div>
+                <div class="settings-item">
+                    <div>
+                        <div class="settings-item-title">Sound scheme</div>
+                        <div class="settings-item-desc">Choose system sounds</div>
+                    </div>
+                    <div class="settings-control">
+                        <select>
+                            <option>Windows Default</option>
+                            <option>No Sounds</option>
+                            <option>Windows Minimal</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="settings-group">
+                <h3>Power & battery</h3>
+                <div class="settings-item">
+                    <div>
+                        <div class="settings-item-title">Power mode</div>
+                        <div class="settings-item-desc">Choose how you want to balance performance and battery life</div>
+                    </div>
+                    <div class="settings-control">
+                        <select>
+                            <option>Balanced</option>
+                            <option>Best performance</option>
+                            <option>Battery saver</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Login Screen -->
+<div class="login-screen" id="loginScreen">
+    <div class="login-background"></div>
+    <div class="login-overlay">
+        <div class="login-time" id="loginTime">10:30 AM</div>
+        <div class="login-date" id="loginDate">Monday, May 1</div>
+    </div>
+    <div class="login-container">
+        <div class="user-avatar">
+            <svg viewBox="0 0 24 24">
+                <path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z" fill="currentColor"/>
+            </svg>
+        </div>
+        <div class="login-username">User</div>
+        <div class="login-password-container">
+            <input type="password" class="login-password" placeholder="Password" id="loginPassword">
+        </div>
+        <div class="login-hint">Hint: Just press Enter</div>
+        <div class="login-options">
+            <div class="login-option">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 19.47,11.34 19.43,11L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.96 19.05,5.05L16.56,6.05C16.04,5.66 15.5,5.32 14.87,5.07L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.5,2.42L9.13,5.07C8.5,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.21,8.95 2.27,9.22 2.46,9.37L4.57,11C4.53,11.34 4.5,11.67 4.5,12C4.5,12.33 4.53,12.65 4.57,12.97L2.46,14.63C2.27,14.78 2.21,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,18.95L7.44,17.94C7.96,18.34 8.5,18.68 9.13,18.93L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.5,21.58L14.87,18.93C15.5,18.67 16.04,18.34 16.56,17.94L19.05,18.95C19.27,19.03 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z" fill="currentColor"/>
+                </svg>
+                <span>Accessibility</span>
+            </div>
+            <div class="login-option">
+                <svg viewBox="0 0 24 24">
+                    <path d="M16.56,5.44L15.11,6.89C16.84,7.94 18,9.83 18,12A6,6 0 0,1 12,18A6,6 0 0,1 6,12C6,9.83 7.16,7.94 8.88,6.88L7.44,5.44C5.36,6.88 4,9.28 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12C20,9.28 18.64,6.88 16.56,5.44M13,3H11V13H13" fill="currentColor"/>
+                </svg>
+                <span>Power</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="module" src="script.js"></script>
+</body>
+</html>
