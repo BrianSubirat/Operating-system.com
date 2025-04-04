@@ -129,14 +129,18 @@ body {
 }
 
 .search-button {
-    width: 40px;
-    height: 40px;
+    width: 240px;
+    height: 32px;
     border-radius: 4px;
     display: flex;
     align-items: center;
-    justify-content: center;
+    padding: 0 8px;
     cursor: pointer;
     transition: background-color 0.2s;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    background-color: var(--bg-color);
+    margin-left: 8px;
+    position: relative;
 }
 
 .search-button:hover {
@@ -144,9 +148,53 @@ body {
 }
 
 .search-icon {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
     color: var(--text-color);
+    margin-right: 8px;
+}
+
+.search-input {
+    border: none;
+    background: transparent;
+    outline: none;
+    width: 100%;
+    font-size: 13px;
+}
+
+.search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background-color: var(--panel-bg);
+    border-radius: 0 0 8px 8px;
+    box-shadow: var(--window-shadow);
+    z-index: 1000;
+    max-height: 300px;
+    overflow-y: auto;
+    display: none;
+}
+
+.search-results.show {
+    display: block;
+}
+
+.search-result-item {
+    padding: 10px 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.search-result-item:hover {
+    background-color: var(--hover-bg);
+}
+
+.search-result-item svg {
+    width: 16px;
+    height: 16px;
 }
 
 .taskbar-icons {
@@ -191,13 +239,18 @@ body {
 .taskbar-right {
     display: flex;
     align-items: center;
+    padding-right: 12px;
 }
 
 .system-tray {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 12px;
     font-size: 12px;
+}
+
+.time, .date {
+    cursor: pointer;
 }
 
 .weather-info {
@@ -235,10 +288,6 @@ body {
     width: 16px;
     height: 16px;
     color: var(--text-color);
-}
-
-.time, .date {
-    cursor: pointer;
 }
 
 /* Start Menu */
@@ -745,6 +794,139 @@ body {
     border: none;
 }
 
+/* YouTube Window */
+#youtubeWindow .window-content {
+    flex: 1;
+    display: flex;
+}
+
+#youtubeIframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+/* Store Window */
+.store-content {
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    overflow-y: auto;
+}
+
+.store-hero {
+    background-color: #f0f0f0;
+    padding: 32px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.store-hero h2 {
+    font-size: 24px;
+    margin-bottom: 8px;
+}
+
+.store-hero p {
+    font-size: 14px;
+    color: #666;
+}
+
+.store-featured h3 {
+    font-size: 18px;
+    margin-bottom: 16px;
+}
+
+.store-apps {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+}
+
+.store-app {
+    display: flex;
+    background-color: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+}
+
+.store-app:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.store-app-image {
+    width: 120px;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f5f5f5;
+}
+
+.store-app-image svg {
+    width: 80px;
+    height: 80px;
+}
+
+.store-app-info {
+    padding: 12px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.store-app-name {
+    font-weight: 600;
+    font-size: 16px;
+    margin-bottom: 4px;
+}
+
+.store-app-publisher {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.store-app-price {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 16px;
+}
+
+.store-app-button {
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    padding: 6px 20px;
+    border-radius: 4px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    align-self: flex-start;
+}
+
+.store-app-button:hover {
+    background-color: #0063b1;
+}
+
+.store-app-button:disabled {
+    opacity: 0.7;
+    cursor: default;
+}
+
+.download-progress {
+    height: 4px;
+    background-color: var(--accent-color);
+    width: 0%;
+    transition: width 0.2s;
+    border-radius: 2px;
+    margin-top: 10px;
+}
+
 /* Settings Window Styles */
 #settingsWindow {
     width: 900px;
@@ -1108,4 +1290,48 @@ body {
 
 .login-option span {
     font-size: 12px;
+}
+
+.popular-apps {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+.popular-app {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.popular-app:hover {
+    background-color: var(--hover-bg);
+}
+
+.popular-app svg {
+    width: 36px;
+    height: 36px;
+    margin-bottom: 8px;
+}
+
+.popular-app span {
+    font-size: 12px;
+    text-align: center;
+}
+
+/* Minecraft Window */
+#minecraftWindow .window-content {
+    flex: 1;
+    display: flex;
+}
+
+#minecraftIframe {
+    width: 100%;
+    height: 100%;
+    border: none;
 }
