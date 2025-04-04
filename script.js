@@ -130,6 +130,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize Search functionality
     initSearch();
+
+    // Initialize desktop selection
+    initDesktopSelection();
 });
 
 async function fetchWeatherInfo() {
@@ -750,6 +753,74 @@ function initSearch() {
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             searchResults.classList.remove('show');
+        }
+    });
+}
+
+function initDesktopSelection() {
+    const desktop = document.querySelector('.desktop');
+    let isSelecting = false;
+    let startX, startY;
+    let selectionBox;
+
+    desktop.addEventListener('mousedown', (e) => {
+        // Only start selection if not clicking on an icon or other interactive element
+        if (e.target === desktop) {
+            isSelecting = true;
+            startX = e.clientX;
+            startY = e.clientY;
+
+            // Create selection box
+            selectionBox = document.createElement('div');
+            selectionBox.classList.add('desktop-selection-box');
+            selectionBox.style.left = `${startX}px`;
+            selectionBox.style.top = `${startY}px`;
+            desktop.appendChild(selectionBox);
+        }
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        if (!isSelecting) return;
+
+        const currentX = e.clientX;
+        const currentY = e.clientY;
+
+        const width = Math.abs(currentX - startX);
+        const height = Math.abs(currentY - startY);
+        const left = Math.min(startX, currentX);
+        const top = Math.min(startY, currentY);
+
+        selectionBox.style.width = `${width}px`;
+        selectionBox.style.height = `${height}px`;
+        selectionBox.style.left = `${left}px`;
+        selectionBox.style.top = `${top}px`;
+
+        // Select icons within the selection box
+        const desktopIcons = document.querySelectorAll('.icon');
+        desktopIcons.forEach(icon => {
+            const iconRect = icon.getBoundingClientRect();
+            const selectionRect = selectionBox.getBoundingClientRect();
+
+            const isOverlapping = 
+                iconRect.left < selectionRect.right &&
+                iconRect.right > selectionRect.left &&
+                iconRect.top < selectionRect.bottom &&
+                iconRect.bottom > selectionRect.top;
+
+            if (isOverlapping) {
+                icon.classList.add('selected');
+            } else {
+                icon.classList.remove('selected');
+            }
+        });
+    });
+
+    document.addEventListener('mouseup', () => {
+        if (!isSelecting) return;
+
+        isSelecting = false;
+        if (selectionBox) {
+            selectionBox.remove();
         }
     });
 }
