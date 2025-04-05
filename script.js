@@ -175,6 +175,50 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Initialize FNAF app in store
+    const fnafStoreApp = document.getElementById('fnafStoreApp');
+    if (fnafStoreApp) {
+        // Update the FNAF icon in the store display
+        fnafStoreApp.querySelector('.store-app-image').innerHTML = '<img src="/fnaf_1_logo_by_esoteriques_df2b7us-fullview-2719929492.jpg" style="width: 80px; height: 80px;" alt="Five Nights at Freddy\'s">';
+        
+        fnafStoreApp.querySelector('.store-app-button').addEventListener('click', () => {
+            const button = fnafStoreApp.querySelector('.store-app-button');
+            if (button.textContent === 'Get') {
+                button.textContent = 'Installing...';
+                button.disabled = true;
+                
+                // Add loading animation
+                const progressBar = document.createElement('div');
+                progressBar.className = 'download-progress';
+                fnafStoreApp.querySelector('.store-app-info').appendChild(progressBar);
+                
+                // Simulate download progress
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += 5;
+                    progressBar.style.width = `${progress}%`;
+                    
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                        setTimeout(() => {
+                            button.textContent = 'Open';
+                            button.disabled = false;
+                            progressBar.remove();
+                            showSystemNotification('Five Nights at Freddy\'s has been installed!');
+                            
+                            // Add FNAF to desktop with the image instead of svg
+                            addAppToDesktop("Five Nights at Freddy's", "");
+                        }, 500);
+                    }
+                }, 150);
+                
+                showSystemNotification('Downloading Five Nights at Freddy\'s...');
+            } else if (button.textContent === 'Open') {
+                openApp('Five Nights at Freddy\'s');
+            }
+        });
+    }
+
     // Initialize user menu and login screen
     initUserMenu();
 
@@ -240,12 +284,14 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Update volume icon based on level
         const volumeIconPath = volumeIcon.querySelector('svg path');
-        if (volume < 0.3) {
-            volumeIconPath.setAttribute('d', 'M7,9V15H11L16,20V4L11,9H7Z');
-        } else if (volume < 0.7) {
-            volumeIconPath.setAttribute('d', 'M5,9V15H9L14,20V4L9,9H5M18.5,12C18.5,10.23 17.5,8.71 16,7.97V16C17.5,15.29 18.5,13.76 18.5,12Z');
-        } else {
-            volumeIconPath.setAttribute('d', 'M14,3.23V5.29C16.89,6.15 19,8.83 19,12C19,15.17 16.89,17.84 14,18.7V20.77C18,19.86 21,16.28 21,12C21,7.72 18,4.14 14,3.23M16.5,12C16.5,10.23 15.5,8.71 14,7.97V16C15.5,15.29 16.5,13.76 16.5,12M3,9V15H7L12,20V4L7,9H3Z');
+        if (volumeIconPath) {
+            if (volume < 0.3) {
+                volumeIconPath.setAttribute('d', 'M7,9V15H11L16,20V4L11,9H7Z');
+            } else if (volume < 0.7) {
+                volumeIconPath.setAttribute('d', 'M5,9V15H9L14,20V4L9,9H5M18.5,12C18.5,10.23 17.5,8.71 16,7.97V16C17.5,15.29 18.5,13.76 18.5,12Z');
+            } else {
+                volumeIconPath.setAttribute('d', 'M14,3.23V5.29C16.89,6.15 19,8.83 19,12C19,15.17 16.89,17.84 14,18.7V20.77C18,19.86 21,16.28 21,12C21,7.72 18,4.14 14,3.23M16.5,12C16.5,10.23 15.5,8.71 14,7.97V16C15.5,15.29 16.5,13.76 16.5,12M3,9V15H7L12,20V4L7,9H3Z');
+            }
         }
     });
     
@@ -345,6 +391,15 @@ function openApp(appName) {
         // Ensure the window is sized appropriately for the game
         codZombiesWindow.style.width = '900px';
         codZombiesWindow.style.height = '700px';
+    } else if (appName === 'Five Nights at Freddy\'s') {
+        const fnafWindow = document.getElementById('fnafWindow');
+        const fnafIframe = document.getElementById('fnafIframe');
+        fnafIframe.src = 'https://run3.io/popgame/fnaf/fnaf1/';
+        activateWindow(fnafWindow, '.taskbar-icon svg[d*="12,3C7.58,3 4,4.79 4,7V17C4,19.21"]');
+        
+        // Ensure the window is sized appropriately for the game
+        fnafWindow.style.width = '900px';
+        fnafWindow.style.height = '700px';
     }
 }
 
@@ -511,6 +566,18 @@ function initializeWindowControls() {
         
         closeBtn.addEventListener('click', () => {
             win.classList.remove('active');
+            
+            // Specific handling for game windows to stop sounds
+            if (win.id === 'minecraftWindow' || 
+                win.id === 'codZombiesWindow' || 
+                win.id === 'fnafWindow') {
+                
+                // Reset iframe source to stop sounds and interactions
+                const iframe = win.querySelector('iframe');
+                if (iframe) {
+                    iframe.src = 'about:blank';
+                }
+            }
             
             // Deactivate the corresponding taskbar icon
             if (win.id === 'fileExplorer') {
@@ -793,6 +860,11 @@ function addAppToDesktop(appName, svgPath) {
                 <img src="/Screenshot_2025-04-04_202904-removebg-preview.png" class="icon-svg" alt="COD Zombies: Portable">
                 <span>${appName}</span>
             `;
+        } else if (appName === 'Five Nights at Freddy\'s') {
+            appIcon.innerHTML = `
+                <img src="/fnaf_1_logo_by_esoteriques_df2b7us-fullview-2719929492.jpg" class="icon-svg" alt="Five Nights at Freddy's">
+                <span>${appName}</span>
+            `;
         } else {
             appIcon.innerHTML = `
                 <svg viewBox="0 0 24 24" class="icon-svg">
@@ -826,7 +898,8 @@ function initSearch() {
         { name: 'Store', icon: '<path d="M3,5H9V11H3V5M5,7V9H7V7H5M11,7H21V9H11V7M11,15H21V17H11V15M5,13V15H7V13H5M3,13H9V19H3V13Z" fill="#7F7F7F"/>' },
         { name: 'YouTube', icon: '<path d="M10,15L15.19,12L10,9V15M21.56,7.17C21.69,7.64 21.78,8.27 21.84,9.07C21.91,9.87 21.94,10.56 21.94,11.16L22,12C22,14.19 21.84,15.8 21.56,16.83C21.31,17.73 20.73,18.31 19.83,18.56C19.36,18.69 18.5,18.78 17.18,18.84C15.88,18.91 14.69,18.94 13.59,18.94L12,19C7.81,19 5.2,18.84 4.17,18.56C3.27,18.31 2.69,17.73 2.44,16.83C2.31,16.36 2.22,15.73 2.16,14.93C2.09,14.13 2.06,13.44 2.06,12.84L2,12C2,9.81 2.16,8.2 2.44,7.17C2.69,6.27 3.27,5.69 4.17,5.44C4.64,5.31 5.5,5.22 6.82,5.16C8.12,5.09 9.31,5.06 10.41,5.06L12,5C16.19,5 18.8,5.16 19.83,5.44C20.73,5.69 21.31,6.27 21.56,7.17Z" fill="#FF0000"/>' },
         { name: 'Minecraft', isImage: true },
-        { name: 'COD Zombies: Portable', icon: '<path d="M21,5C19.89,4.65 18.67,4.5 17.5,4.5C15.55,4.5 13.45,4.9 12,6C10.55,4.9 8.45,4.5 6.5,4.5C4.55,4.5 2.45,4.9 1,6V20.65C1,20.9 1.25,21.15 1.5,21.15C1.6,21.15 1.65,21.1 1.75,21.1C3.1,20.45 5.05,20 6.5,20C8.45,20 10.55,20.4 12,21.5C13.35,20.65 15.8,20 17.5,20C19.15,20 20.85,20.3 22.25,21.05C22.35,21.1 22.4,21.1 22.5,21.1C22.75,21.1 23,20.85 23,20.6V6C22.4,5.55 21.75,5.25 21,5M21,18.5C19.9,18.15 18.7,18 17.5,18C15.8,18 13.35,18.65 12,19.5V8C13.35,7.15 15.8,6.5 17.5,6.5C18.7,6.5 19.9,6.65 21,7V18.5Z" fill="#aa3333"/>' }
+        { name: 'COD Zombies: Portable', icon: '<path d="M21,5C19.89,4.65 18.67,4.5 17.5,4.5C15.55,4.5 13.45,4.9 12,6C10.55,4.9 8.45,4.5 6.5,4.5C4.55,4.5 2.45,4.9 1,6V20.65C1,20.9 1.25,21.15 1.5,21.15C1.6,21.15 1.65,21.1 1.75,21.1C3.1,20.45 5.05,20 6.5,20C8.45,20 10.55,20.4 12,21.5C13.35,20.65 15.8,20 17.5,20C19.15,20 20.85,20.3 22.25,21.05C22.35,21.1 22.4,21.1 22.5,21.1C22.75,21.1 23,20.85 23,20.6V6C22.4,5.55 21.75,5.25 21,5M21,18.5C19.9,18.15 18.7,18 17.5,18C15.8,18 13.35,18.65 12,19.5V8C13.35,7.15 15.8,6.5 17.5,6.5C18.7,6.5 19.9,6.65 21,7V18.5Z" fill="#aa3333"/>' },
+        { name: 'Five Nights at Freddy\'s', icon: '<path d="M12,3C7.58,3 4,4.79 4,7V17C4,19.21 7.59,21 12,21C16.41,21 20,19.21 20,17V7C20,4.79 16.42,3 12,3M12,5C16.08,5 18,6.37 18,7C18,7.63 16.08,9 12,9C7.92,9 6,7.63 6,7C6,6.37 7.92,5 12,5M6,9.12C7.47,9.67 9.61,10 12,10C14.39,10 16.53,9.67 18,9.12V12.41C17.38,12.18 16.64,12 15.85,12C13.18,12 11.87,13.6 10.42,15.36C9.38,16.67 8.88,17 7.65,17C6.09,17 6,15.37 6,15.37V9.12M18,14.09V16C18,16.65 16.17,18 12,18C7.83,18 6,16.65 6,16V15.36C6.64,15.67 7.14,15.91 8.08,15.91C9.89,15.91 10.56,15.28 11.89,13.6C13.16,12 14.23,10 16.15,10C16.83,10 17.45,10.03 18,10.09V14.09Z" fill="#AA0000"/>' }
     ];
     
     searchInput.addEventListener('input', () => {
@@ -983,12 +1056,6 @@ function initContextMenu() {
         menu.className = 'context-menu';
         
         menu.innerHTML = `
-            <div class="context-menu-item" id="viewMenuItem">
-                <svg viewBox="0 0 24 24">
-                    <path d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,10A2,2 0 0,1 14,12A2,2 0 0,1 12,14A2,2 0 0,1 10,12A2,2 0 0,1 12,10M12,4A2,2 0 0,1 14,6A2,2 0 0,1 12,8A2,2 0 0,1 10,6A2,2 0 0,1 12,4Z" fill="currentColor"/>
-                </svg>
-                <span>View</span>
-            </div>
             <div class="context-menu-item" id="sortByMenuItem">
                 <svg viewBox="0 0 24 24">
                     <path d="M3,13H15V11H3M3,6V8H21V6M3,18H9V16H3V18Z" fill="currentColor"/>
@@ -1027,11 +1094,6 @@ function initContextMenu() {
         contextMenu = menu;
         
         // Add event listeners to menu items
-        document.getElementById('viewMenuItem').addEventListener('click', () => {
-            showSystemNotification('View options');
-            hideContextMenu();
-        });
-        
         document.getElementById('sortByMenuItem').addEventListener('click', () => {
             showSystemNotification('Sort options');
             hideContextMenu();
@@ -1040,6 +1102,20 @@ function initContextMenu() {
         document.getElementById('refreshMenuItem').addEventListener('click', () => {
             showSystemNotification('Refreshing desktop...');
             hideContextMenu();
+            
+            // Show loading animation
+            const loadingOverlay = document.createElement('div');
+            loadingOverlay.className = 'loading-overlay';
+            loadingOverlay.innerHTML = `
+                <div class="loading-spinner"></div>
+            `;
+            document.body.appendChild(loadingOverlay);
+            
+            // Simulate refresh action
+            setTimeout(() => {
+                loadingOverlay.remove();
+                showSystemNotification('Desktop refreshed');
+            }, 1500);
         });
         
         document.getElementById('newMenuItem').addEventListener('click', () => {
@@ -1053,7 +1129,7 @@ function initContextMenu() {
         });
         
         document.getElementById('personalizeMenuItem').addEventListener('click', () => {
-            showSystemNotification('Personalization options');
+            openPersonalizationPanel();
             hideContextMenu();
         });
     }
@@ -1115,3 +1191,238 @@ function initContextMenu() {
         }
     });
 }
+
+// Add personalization panel
+function openPersonalizationPanel() {
+    // Remove existing panel if it exists
+    if (document.querySelector('.personalize-panel')) {
+        document.querySelector('.personalize-panel').remove();
+    }
+    
+    const panel = document.createElement('div');
+    panel.className = 'personalize-panel';
+    
+    panel.innerHTML = `
+        <div class="personalize-header">
+            <h2>Personalize</h2>
+            <button class="close-button">×</button>
+        </div>
+        <div class="personalize-content">
+            <div class="personalize-section">
+                <h3>Background</h3>
+                <div class="background-options">
+                    <div class="background-option" data-bg="https://images.unsplash.com/photo-1546587348-d12660c30c50?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8d2luZG93cyUyMGJhY2tncm91bmR8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=1920&q=80">
+                        <img src="https://images.unsplash.com/photo-1546587348-d12660c30c50?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8d2luZG93cyUyMGJhY2tncm91bmR8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=120&q=80" alt="Default">
+                    </div>
+                    <div class="background-option" data-bg="https://images.unsplash.com/photo-1542331325-bebfc9b282e1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80">
+                        <img src="https://images.unsplash.com/photo-1542331325-bebfc9b282e1?ixlib=rb-4.0.3&auto=format&fit=crop&w=120&q=80" alt="Mountains">
+                    </div>
+                    <div class="background-option" data-bg="https://images.unsplash.com/photo-1554147090-e1221a04a025?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80">
+                        <img src="https://images.unsplash.com/photo-1554147090-e1221a04a025?ixlib=rb-4.0.3&auto=format&fit=crop&w=120&q=80" alt="Ocean">
+                    </div>
+                    <div class="background-option" data-bg="https://images.unsplash.com/photo-1497796742626-fe30f204ec54?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80">
+                        <img src="https://images.unsplash.com/photo-1497796742626-fe30f204ec54?ixlib=rb-4.0.3&auto=format&fit=crop&w=120&q=80" alt="Forest">
+                    </div>
+                </div>
+            </div>
+            <div class="personalize-section">
+                <h3>Mouse Cursor</h3>
+                <div class="cursor-options">
+                    <div class="cursor-option" data-cursor="default">
+                        <div class="cursor-preview default-cursor"></div>
+                        <span>Default</span>
+                    </div>
+                    <div class="cursor-option" data-cursor="pointer">
+                        <div class="cursor-preview pointer-cursor"></div>
+                        <span>Pointer</span>
+                    </div>
+                    <div class="cursor-option" data-cursor="crosshair">
+                        <div class="cursor-preview crosshair-cursor"></div>
+                        <span>Crosshair</span>
+                    </div>
+                    <div class="cursor-option" data-cursor="text">
+                        <div class="cursor-preview text-cursor"></div>
+                        <span>Text</span>
+                    </div>
+                </div>
+            </div>
+            <div class="personalize-section">
+                <h3>UI Theme</h3>
+                <div class="theme-options">
+                    <div class="theme-option" data-theme="light">
+                        <div class="theme-preview light-theme"></div>
+                        <span>Light</span>
+                    </div>
+                    <div class="theme-option" data-theme="dark">
+                        <div class="theme-preview dark-theme"></div>
+                        <span>Dark</span>
+                    </div>
+                    <div class="theme-option" data-theme="blue">
+                        <div class="theme-preview blue-theme"></div>
+                        <span>Blue</span>
+                    </div>
+                    <div class="theme-option" data-theme="green">
+                        <div class="theme-preview green-theme"></div>
+                        <span>Green</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(panel);
+    
+    // Close button event
+    panel.querySelector('.close-button').addEventListener('click', () => {
+        panel.remove();
+    });
+    
+    // Background selection
+    panel.querySelectorAll('.background-option').forEach(option => {
+        option.addEventListener('click', () => {
+            const bgUrl = option.getAttribute('data-bg');
+            document.querySelector('.desktop').style.backgroundImage = `url('${bgUrl}')`;
+            document.querySelector('.login-background').style.backgroundImage = `url('${bgUrl}')`;
+            localStorage.setItem('desktop-background', bgUrl);
+            
+            // Highlight selected option
+            panel.querySelectorAll('.background-option').forEach(opt => opt.classList.remove('selected'));
+            option.classList.add('selected');
+            
+            showSystemNotification('Background changed');
+        });
+    });
+    
+    // Cursor selection
+    panel.querySelectorAll('.cursor-option').forEach(option => {
+        option.addEventListener('click', () => {
+            const cursorType = option.getAttribute('data-cursor');
+            document.body.style.cursor = cursorType;
+            localStorage.setItem('cursor-style', cursorType);
+            
+            // Highlight selected option
+            panel.querySelectorAll('.cursor-option').forEach(opt => opt.classList.remove('selected'));
+            option.classList.add('selected');
+            
+            showSystemNotification('Mouse cursor changed');
+        });
+    });
+    
+    // UI Theme selection
+    panel.querySelectorAll('.theme-option').forEach(option => {
+        option.addEventListener('click', () => {
+            const theme = option.getAttribute('data-theme');
+            applyTheme(theme);
+            localStorage.setItem('ui-theme', theme);
+            
+            // Highlight selected option
+            panel.querySelectorAll('.theme-option').forEach(opt => opt.classList.remove('selected'));
+            option.classList.add('selected');
+            
+            showSystemNotification('UI Theme changed');
+        });
+    });
+    
+    // Set current selections as active
+    const currentBg = localStorage.getItem('desktop-background');
+    if (currentBg) {
+        const bgOption = panel.querySelector(`.background-option[data-bg="${currentBg}"]`);
+        if (bgOption) bgOption.classList.add('selected');
+    }
+    
+    const currentCursor = localStorage.getItem('cursor-style');
+    if (currentCursor) {
+        const cursorOption = panel.querySelector(`.cursor-option[data-cursor="${currentCursor}"]`);
+        if (cursorOption) cursorOption.classList.add('selected');
+    }
+    
+    const currentTheme = localStorage.getItem('ui-theme');
+    if (currentTheme) {
+        const themeOption = panel.querySelector(`.theme-option[data-theme="${currentTheme}"]`);
+        if (themeOption) themeOption.classList.add('selected');
+    }
+}
+
+function applyTheme(theme) {
+    const root = document.documentElement;
+    
+    switch(theme) {
+        case 'dark':
+            root.style.setProperty('--taskbar-bg', 'rgba(30, 30, 30, 0.85)');
+            root.style.setProperty('--panel-bg', 'rgba(30, 30, 30, 0.95)');
+            root.style.setProperty('--window-bg', '#2d2d2d');
+            root.style.setProperty('--bg-color', '#1e1e1e');
+            root.style.setProperty('--text-color', '#ffffff');
+            root.style.setProperty('--hover-bg', 'rgba(255, 255, 255, 0.1)');
+            root.style.setProperty('--active-bg', 'rgba(255, 255, 255, 0.15)');
+            root.style.setProperty('--accent-color', '#0078d7');
+            document.body.classList.add('dark-mode');
+            break;
+        case 'blue':
+            root.style.setProperty('--taskbar-bg', 'rgba(0, 120, 215, 0.85)');
+            root.style.setProperty('--panel-bg', 'rgba(0, 120, 215, 0.95)');
+            root.style.setProperty('--window-bg', '#ffffff');
+            root.style.setProperty('--bg-color', '#e6f2ff');
+            root.style.setProperty('--text-color', '#333333');
+            root.style.setProperty('--hover-bg', 'rgba(0, 0, 0, 0.05)');
+            root.style.setProperty('--active-bg', 'rgba(0, 0, 0, 0.1)');
+            root.style.setProperty('--accent-color', '#0057a8');
+            document.body.classList.remove('dark-mode');
+            break;
+        case 'green':
+            root.style.setProperty('--taskbar-bg', 'rgba(0, 120, 50, 0.85)');
+            root.style.setProperty('--panel-bg', 'rgba(0, 120, 50, 0.95)');
+            root.style.setProperty('--window-bg', '#ffffff');
+            root.style.setProperty('--bg-color', '#e6fff2');
+            root.style.setProperty('--text-color', '#333333');
+            root.style.setProperty('--hover-bg', 'rgba(0, 0, 0, 0.05)');
+            root.style.setProperty('--active-bg', 'rgba(0, 0, 0, 0.1)');
+            root.style.setProperty('--accent-color', '#00784c');
+            document.body.classList.remove('dark-mode');
+            break;
+        default: // light
+            root.style.setProperty('--taskbar-bg', 'rgba(243, 243, 243, 0.85)');
+            root.style.setProperty('--panel-bg', 'rgba(243, 243, 243, 0.95)');
+            root.style.setProperty('--window-bg', '#ffffff');
+            root.style.setProperty('--bg-color', '#f9f9f9');
+            root.style.setProperty('--text-color', '#333333');
+            root.style.setProperty('--hover-bg', 'rgba(0, 0, 0, 0.05)');
+            root.style.setProperty('--active-bg', 'rgba(0, 0, 0, 0.1)');
+            root.style.setProperty('--accent-color', '#0078d7');
+            document.body.classList.remove('dark-mode');
+    }
+}
+
+// Apply saved preferences on page load
+function loadUserPreferences() {
+    // Load background
+    const savedBg = localStorage.getItem('desktop-background');
+    if (savedBg) {
+        document.querySelector('.desktop').style.backgroundImage = `url('${savedBg}')`;
+        document.querySelector('.login-background').style.backgroundImage = `url('${savedBg}')`;
+    }
+    
+    // Load cursor
+    const savedCursor = localStorage.getItem('cursor-style');
+    if (savedCursor) {
+        document.body.style.cursor = savedCursor;
+    }
+    
+    // Load theme
+    const savedTheme = localStorage.getItem('ui-theme');
+    if (savedTheme) {
+        applyTheme(savedTheme);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    // ... existing code ...
+    
+    // Initialize context menu
+    initContextMenu();
+    
+    // Load user preferences
+    loadUserPreferences();
+    
+    // ... existing code ...
+});
