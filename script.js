@@ -189,6 +189,72 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize context menu
     initContextMenu();
+
+    // Initialize volume control
+    const volumeIcon = document.getElementById('volumeIcon');
+    const volumeSlider = document.getElementById('volumeSlider');
+    const volumeSliderInner = document.getElementById('volumeSliderInner');
+    
+    // Create an audio context and oscillator for sound testing
+    let audioContext = null;
+    let oscillator = null;
+    
+    function initAudio() {
+        if (audioContext) return;
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        oscillator.type = 'sine';
+        oscillator.frequency.value = 440;
+        gainNode.gain.value = 0.1; // Low volume
+        oscillator.start();
+        oscillator.stop(audioContext.currentTime + 0.1); // Play for 0.1 seconds
+    }
+    
+    volumeIcon.addEventListener('click', () => {
+        volumeSlider.classList.toggle('active');
+        // Play a short sound when clicking the volume icon
+        initAudio();
+    });
+    
+    volumeSlider.addEventListener('click', (e) => {
+        const sliderWidth = volumeSlider.clientWidth;
+        const clickX = e.offsetX;
+        const volume = Math.min(Math.max(clickX / sliderWidth, 0), 1);
+        volumeSliderInner.style.width = `${volume * 100}%`;
+        
+        // Play a test sound at the selected volume
+        initAudio();
+        if (audioContext) {
+            const gainNode = audioContext.createGain();
+            const oscillator = audioContext.createOscillator();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            gainNode.gain.value = volume * 0.2; // Scale volume
+            oscillator.frequency.value = 440;
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.1);
+        }
+        
+        // Update volume icon based on level
+        const volumeIconPath = volumeIcon.querySelector('svg path');
+        if (volume < 0.3) {
+            volumeIconPath.setAttribute('d', 'M7,9V15H11L16,20V4L11,9H7Z');
+        } else if (volume < 0.7) {
+            volumeIconPath.setAttribute('d', 'M5,9V15H9L14,20V4L9,9H5M18.5,12C18.5,10.23 17.5,8.71 16,7.97V16C17.5,15.29 18.5,13.76 18.5,12Z');
+        } else {
+            volumeIconPath.setAttribute('d', 'M14,3.23V5.29C16.89,6.15 19,8.83 19,12C19,15.17 16.89,17.84 14,18.7V20.77C18,19.86 21,16.28 21,12C21,7.72 18,4.14 14,3.23M16.5,12C16.5,10.23 15.5,8.71 14,7.97V16C15.5,15.29 16.5,13.76 16.5,12M3,9V15H7L12,20V4L7,9H3Z');
+        }
+    });
+    
+    // Hide volume slider when clicking elsewhere
+    document.addEventListener('click', (e) => {
+        if (!volumeIcon.contains(e.target) && !volumeSlider.contains(e.target)) {
+            volumeSlider.classList.remove('active');
+        }
+    });
 });
 
 async function fetchWeatherInfo() {
@@ -219,8 +285,8 @@ function updateClock() {
     const timeElement = document.getElementById('time');
     const dateElement = document.getElementById('date');
     
-    timeElement.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    dateElement.textContent = now.toLocaleDateString([], { month: 'numeric', day: 'numeric', year: 'numeric' });
+    timeElement.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    dateElement.textContent = now.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
     
     // Update login screen time too
     const loginTimeEl = document.getElementById('loginTime');
@@ -253,7 +319,7 @@ function openApp(appName) {
         const edgeWindow = document.getElementById('edgeWindow');
         const edgeIframe = document.getElementById('edgeIframe');
         edgeIframe.src = 'https://swiftgaurd-com.pages.dev/'; 
-        activateWindow(edgeWindow, '.taskbar-icon svg[d*="21.86,12.5C21.1,11.63"]');
+        activateWindow(edgeWindow, '.taskbar-icon img');
     } else if (appName === 'Settings') {
         const settingsWindow = document.getElementById('settingsWindow');
         activateWindow(settingsWindow, '.taskbar-icon svg[d*="3,5H9V11H3V5M5,7V9H7V7H5M11,7H21V9H11V7"]');
@@ -755,7 +821,7 @@ function initSearch() {
     // List of apps for search
     const apps = [
         { name: 'File Explorer', icon: '<path d="M20,18H4V8H20M20,6H12L10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6Z" fill="#FFB900"/>' },
-        { name: 'Edge', icon: '<path d="M21.86,12.5C21.1,11.63 20.15,11.13 19,11C19,10.43 19,9.5 19,9A7,7 0 0,0 12,2A7,7 0 0,0 5,9C5,9.5 5,10.43 5,11C3.85,11.13 2.9,11.63 2.14,12.5C1.2,13.57 1.14,15.22 1.96,16.43C2.79,17.64 4.4,18 5.5,17.71C6.5,17.43 7,16.85 7,16V11.95C7,11.43 7.43,11 7.95,11H16.05C16.57,11 17,11.43 17,11.95V16C17,16.85 17.5,17.43 18.5,17.71C19.6,18 21.21,17.64 22.04,16.43C22.86,15.22 22.8,13.57 21.86,12.5Z" fill="#0078D7"/>' },
+        { name: 'Edge', isImage: true, imgSrc: '/ChatGPT Image Apr 4, 2025, 09_11_49 PM.png' },
         { name: 'Settings', icon: '<path d="M3,5H9V11H3V5M5,7V9H7V7H5M11,7H21V9H11V7M11,15H21V17H11V15M5,13V15H7V13H5M3,13H9V19H3V13Z" fill="#0078D7"/>' },
         { name: 'Store', icon: '<path d="M3,5H9V11H3V5M5,7V9H7V7H5M11,7H21V9H11V7M11,15H21V17H11V15M5,13V15H7V13H5M3,13H9V19H3V13Z" fill="#7F7F7F"/>' },
         { name: 'YouTube', icon: '<path d="M10,15L15.19,12L10,9V15M21.56,7.17C21.69,7.64 21.78,8.27 21.84,9.07C21.91,9.87 21.94,10.56 21.94,11.16L22,12C22,14.19 21.84,15.8 21.56,16.83C21.31,17.73 20.73,18.31 19.83,18.56C19.36,18.69 18.5,18.78 17.18,18.84C15.88,18.91 14.69,18.94 13.59,18.94L12,19C7.81,19 5.2,18.84 4.17,18.56C3.27,18.31 2.69,17.73 2.44,16.83C2.31,16.36 2.22,15.73 2.16,14.93C2.09,14.13 2.06,13.44 2.06,12.84L2,12C2,9.81 2.16,8.2 2.44,7.17C2.69,6.27 3.27,5.69 4.17,5.44C4.64,5.31 5.5,5.22 6.82,5.16C8.12,5.09 9.31,5.06 10.41,5.06L12,5C16.19,5 18.8,5.16 19.83,5.44C20.73,5.69 21.31,6.27 21.56,7.17Z" fill="#FF0000"/>' },
@@ -788,10 +854,17 @@ function initSearch() {
                 resultItem.className = 'search-result-item';
                 
                 if (app.isImage) {
-                    resultItem.innerHTML = `
-                        <img src="/minecraft-icon-13.png" style="width: 16px; height: 16px;">
-                        <span>${app.name}</span>
-                    `;
+                    if (app.name === 'Edge') {
+                        resultItem.innerHTML = `
+                            <img src="${app.imgSrc}" style="width: 16px; height: 16px;">
+                            <span>${app.name}</span>
+                        `;
+                    } else if (app.name === 'Minecraft') {
+                        resultItem.innerHTML = `
+                            <img src="/minecraft-icon-13.png" style="width: 16px; height: 16px;">
+                            <span>${app.name}</span>
+                        `;
+                    }
                 } else {
                     resultItem.innerHTML = `
                         <svg viewBox="0 0 24 24">${app.icon}</svg>
@@ -912,7 +985,7 @@ function initContextMenu() {
         menu.innerHTML = `
             <div class="context-menu-item" id="viewMenuItem">
                 <svg viewBox="0 0 24 24">
-                    <path d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z" fill="currentColor"/>
+                    <path d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,10A2,2 0 0,1 14,12A2,2 0 0,1 12,14A2,2 0 0,1 10,12A2,2 0 0,1 12,10M12,4A2,2 0 0,1 14,6A2,2 0 0,1 12,8A2,2 0 0,1 10,6A2,2 0 0,1 12,4Z" fill="currentColor"/>
                 </svg>
                 <span>View</span>
             </div>
