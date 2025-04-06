@@ -1728,3 +1728,327 @@ body {
 .dark-mode .store-app-publisher {
     color: rgba(255,255,255,0.7);
 }
+
+.setup-wizard {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(135deg, #0078D7, #00A4EF);
+    color: white;
+    z-index: 100000;
+    display: none;
+    overflow: hidden;
+}
+
+.setup-wizard.active {
+    display: block;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.setup-step {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    max-width: 600px;
+    padding: 40px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    display: none;
+    text-align: center;
+    transition: all 0.3s ease-out;
+}
+
+.setup-step.active {
+    display: block;
+    animation: slideUp 0.5s ease-out;
+}
+
+.setup-step h1 {
+    font-size: 36px;
+    margin-bottom: 20px;
+    font-weight: 300;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.setup-step h2 {
+    font-size: 28px;
+    margin-bottom: 20px;
+    font-weight: 400;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.setup-step p {
+    font-size: 18px;
+    margin-bottom: 30px;
+    opacity: 0.9;
+    line-height: 1.5;
+}
+
+.setup-button {
+    background: white;
+    color: #0078D7;
+    border: none;
+    padding: 14px 34px;
+    border-radius: 30px;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.setup-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    background-color: #f0f0f0;
+}
+
+.setup-button:active {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+}
+
+.language-options {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 30px;
+    max-height: 250px;
+    overflow-y: auto;
+    padding: 5px;
+}
+
+.language-option {
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.2s;
+    display: flex;
+    align-items: center;
+}
+
+.language-option:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateX(5px);
+}
+
+.language-option input[type="radio"] {
+    margin-right: 15px;
+    width: 18px;
+    height: 18px;
+    accent-color: white;
+}
+
+.language-option label {
+    font-size: 18px;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+}
+
+.pin-setup {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.pin-setup input {
+    width: 120px;
+    padding: 16px;
+    border: none;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    font-size: 22px;
+    text-align: center;
+    letter-spacing: 8px;
+    transition: background-color 0.3s, transform 0.2s;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.pin-setup input:focus {
+    background: rgba(255, 255, 255, 0.3);
+    outline: none;
+    transform: scale(1.05);
+}
+
+.pin-hint {
+    margin-bottom: 30px;
+}
+
+.pin-hint input {
+    width: 100%;
+    max-width: 300px;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    font-size: 16px;
+    transition: background-color 0.3s;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.pin-hint input:focus {
+    background: rgba(255, 255, 255, 0.3);
+    outline: none;
+}
+
+.error-message {
+    color: #ff4444;
+    margin-bottom: 20px;
+    min-height: 20px;
+    font-weight: 500;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.games-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 5px;
+}
+
+.game-option {
+    position: relative;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 20px;
+    cursor: pointer;
+    transition: transform 0.2s, background-color 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.game-option:hover {
+    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.game-option input[type="checkbox"] {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 20px;
+    height: 20px;
+    accent-color: white;
+}
+
+.game-option input[type="checkbox"]:checked + label {
+    font-weight: 600;
+}
+
+.game-option label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.game-option img {
+    width: 80px;
+    height: 80px;
+    border-radius: 15px;
+    transition: transform 0.2s;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.game-option:hover img {
+    transform: scale(1.1);
+}
+
+.setup-summary {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 15px;
+    padding: 25px;
+    margin: 30px 0;
+    text-align: left;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    font-size: 18px;
+}
+
+.summary-item:last-child {
+    border-bottom: none;
+}
+
+.setup-progress {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+}
+
+.progress-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transition: background-color 0.3s;
+}
+
+.progress-dot.active {
+    background: white;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { 
+        opacity: 0;
+        transform: translate(-50%, -45%);
+    }
+    to { 
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+}
+
+.setup-branding {
+    position: absolute;
+    top: 30px;
+    left: 30px;
+    display: flex;
+    align-items: center;
+    opacity: 0.9;
+}
+
+.setup-logo {
+    width: 40px;
+    height: 40px;
+    margin-right: 15px;
+}
+
+.setup-logo svg {
+    width: 100%;
+    height: 100%;
+    fill: white;
+}
+
+.setup-title {
+    font-size: 24px;
+    font-weight: 300;
+    letter-spacing: 1px;
+}

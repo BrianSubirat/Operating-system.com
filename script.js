@@ -1,306 +1,333 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Show login screen on page load
-    const loginScreen = document.getElementById('loginScreen');
-    loginScreen.classList.add('active');
-
-    // Initialize time and date
-    updateClock();
-    setInterval(updateClock, 1000); // Update every second
-
-    // Initialize Start Menu
-    const startButton = document.getElementById('startButton');
-    const startMenu = document.getElementById('startMenu');
+    // Check if setup has been completed
+    if (!localStorage.getItem('setupComplete')) {
+        showSetupWizard();
+    }
     
-    startButton.addEventListener('click', () => {
-        startMenu.classList.toggle('active');
-    });
-
-    // Close start menu when clicking elsewhere
-    document.addEventListener('click', (e) => {
-        if (!startMenu.contains(e.target) && !startButton.contains(e.target)) {
-            startMenu.classList.remove('active');
+    // Wrap key initialization functions in try-catch blocks
+    try {
+        // Show login screen on page load
+        const loginScreen = document.getElementById('loginScreen');
+        if (loginScreen) {
+            loginScreen.classList.add('active');
         }
-    });
 
-    // Initialize power menu
-    initPowerMenu();
+        // Initialize time and date
+        updateClock();
+        setInterval(updateClock, 1000); // Update every second
 
-    // Initialize Desktop Icons
-    const desktopIcons = document.querySelectorAll('.icon');
-    
-    desktopIcons.forEach(icon => {
-        icon.addEventListener('dblclick', () => {
-            const appName = icon.getAttribute('data-name');
-            openApp(appName);
-        });
-    });
-
-    // Initialize Taskbar Icons
-    initTaskbarIcons();
-
-    // Initialize File Explorer
-    const fileExplorer = document.getElementById('fileExplorer');
-    
-    // Make windows draggable
-    makeWindowsDraggable();
-
-    // Initialize window controls
-    initializeWindowControls();
-
-    // Make desktop icons and taskbar icons sortable
-    initSortable();
-
-    // Initialize device settings
-    initDeviceSettings();
-
-    // Initialize Settings App
-    const settingsApp = document.getElementById('settingsApp');
-    settingsApp.addEventListener('click', () => {
-        startMenu.classList.remove('active'); // Close start menu when opening settings
-        openApp('Settings');
-    });
-
-    // Initialize Store App in the Start Menu
-    const storeApp = document.querySelector('.app-item:nth-child(4)');
-    if (storeApp) {
-        storeApp.addEventListener('click', () => {
-            startMenu.classList.remove('active');
-            openApp('Store');
-        });
-    }
-
-    // Initialize YouTube app
-    const youtubeApp = document.getElementById('youtubeApp');
-    if (youtubeApp) {
-        youtubeApp.addEventListener('click', () => {
-            startMenu.classList.remove('active');
-            openApp('YouTube');
-        });
-    }
-    
-    // Initialize COD Zombies app
-    const codZombiesApp = document.getElementById('codZombiesApp');
-    if (codZombiesApp) {
-        codZombiesApp.addEventListener('click', () => {
-            startMenu.classList.remove('active');
-            openApp('COD Zombies: Portable');
-        });
-    }
-
-    // Initialize Minecraft app in store
-    const minecraftApp = document.getElementById('minecraftApp');
-    if (minecraftApp) {
-        // Update the Minecraft icon in the store display
-        minecraftApp.querySelector('.store-app-image').innerHTML = '<img src="/minecraft-icon-13.png" style="width: 80px; height: 80px;" alt="Minecraft">';
+        // Initialize Start Menu
+        const startButton = document.getElementById('startButton');
+        const startMenu = document.getElementById('startMenu');
         
-        minecraftApp.querySelector('.store-app-button').addEventListener('click', () => {
-            const button = minecraftApp.querySelector('.store-app-button');
-            if (button.textContent === 'Get') {
-                button.textContent = 'Installing...';
-                button.disabled = true;
-                
-                // Add loading animation
-                const progressBar = document.createElement('div');
-                progressBar.className = 'download-progress';
-                minecraftApp.querySelector('.store-app-info').appendChild(progressBar);
-                
-                // Simulate download progress
-                let progress = 0;
-                const interval = setInterval(() => {
-                    progress += 5;
-                    progressBar.style.width = `${progress}%`;
-                    
-                    if (progress >= 100) {
-                        clearInterval(interval);
-                        setTimeout(() => {
-                            button.textContent = 'Open';
-                            button.disabled = false;
-                            progressBar.remove();
-                            showSystemNotification('Minecraft has been installed!');
-                            
-                            // Add Minecraft to desktop with the image instead of svg
-                            addAppToDesktop("Minecraft", "");
-                        }, 500);
-                    }
-                }, 150);
-                
-                showSystemNotification('Downloading Minecraft...');
-            } else if (button.textContent === 'Open') {
-                openApp('Minecraft');
+        if (startButton && startMenu) {
+            startButton.addEventListener('click', () => {
+                startMenu.classList.toggle('active');
+            });
+
+            // Close start menu when clicking elsewhere
+            document.addEventListener('click', (e) => {
+                if (!startMenu.contains(e.target) && !startButton.contains(e.target)) {
+                    startMenu.classList.remove('active');
+                }
+            });
+        }
+
+        // Safe function to add event listeners
+        function safeAddEventListener(selector, event, callback) {
+            const element = document.querySelector(selector);
+            if (element) {
+                element.addEventListener(event, callback);
+            } else {
+                console.warn(`Element not found: ${selector}`);
             }
-        });
-    }
-    
-    // Initialize COD Zombies app in store
-    const codZombiesStoreApp = document.getElementById('codZombiesStoreApp');
-    if (codZombiesStoreApp) {
-        // Update the COD Zombies icon in the store display
-        codZombiesStoreApp.querySelector('.store-app-image').innerHTML = '<img src="/Screenshot_2025-04-04_202904-removebg-preview.png" style="width: 80px; height: 80px;" alt="COD Zombies: Portable">';
+        }
+
+        // Initialize power menu
+        initPowerMenu();
+
+        // Initialize Desktop Icons
+        const desktopIcons = document.querySelectorAll('.icon');
         
-        codZombiesStoreApp.querySelector('.store-app-button').addEventListener('click', () => {
-            const button = codZombiesStoreApp.querySelector('.store-app-button');
-            if (button.textContent === 'Get') {
-                button.textContent = 'Installing...';
-                button.disabled = true;
-                
-                // Add loading animation
-                const progressBar = document.createElement('div');
-                progressBar.className = 'download-progress';
-                codZombiesStoreApp.querySelector('.store-app-info').appendChild(progressBar);
-                
-                // Simulate download progress
-                let progress = 0;
-                const interval = setInterval(() => {
-                    progress += 5;
-                    progressBar.style.width = `${progress}%`;
-                    
-                    if (progress >= 100) {
-                        clearInterval(interval);
-                        setTimeout(() => {
-                            button.textContent = 'Open';
-                            button.disabled = false;
-                            progressBar.remove();
-                            showSystemNotification('COD Zombies: Portable has been installed!');
-                            
-                            // Add COD Zombies to desktop with specific icon
-                            addAppToDesktop("COD Zombies: Portable", '');
-                        }, 500);
-                    }
-                }, 150);
-                
-                showSystemNotification('Downloading COD Zombies: Portable...');
-            } else if (button.textContent === 'Open') {
+        desktopIcons.forEach(icon => {
+            icon.addEventListener('dblclick', () => {
+                const appName = icon.getAttribute('data-name');
+                if (appName) {
+                    openApp(appName);
+                }
+            });
+        });
+
+        // Initialize Taskbar Icons
+        initTaskbarIcons();
+
+        // Initialize File Explorer
+        const fileExplorer = document.getElementById('fileExplorer');
+        
+        // Make windows draggable
+        makeWindowsDraggable();
+
+        // Initialize window controls
+        initializeWindowControls();
+
+        // Make desktop icons and taskbar icons sortable
+        initSortable();
+
+        // Initialize device settings
+        initDeviceSettings();
+
+        // Initialize Settings App
+        const settingsApp = document.getElementById('settingsApp');
+        settingsApp.addEventListener('click', () => {
+            startMenu.classList.remove('active'); // Close start menu when opening settings
+            openApp('Settings');
+        });
+
+        // Initialize Store App in the Start Menu
+        const storeApp = document.querySelector('.app-item:nth-child(4)');
+        if (storeApp) {
+            storeApp.addEventListener('click', () => {
+                startMenu.classList.remove('active');
+                openApp('Store');
+            });
+        }
+
+        // Initialize YouTube app
+        const youtubeApp = document.getElementById('youtubeApp');
+        if (youtubeApp) {
+            youtubeApp.addEventListener('click', () => {
+                startMenu.classList.remove('active');
+                openApp('YouTube');
+            });
+        }
+        
+        // Initialize COD Zombies app
+        const codZombiesApp = document.getElementById('codZombiesApp');
+        if (codZombiesApp) {
+            codZombiesApp.addEventListener('click', () => {
+                startMenu.classList.remove('active');
                 openApp('COD Zombies: Portable');
-            }
-        });
-    }
+            });
+        }
 
-    // Initialize FNAF app in store
-    const fnafStoreApp = document.getElementById('fnafStoreApp');
-    if (fnafStoreApp) {
-        // Update the FNAF icon in the store display
-        fnafStoreApp.querySelector('.store-app-image').innerHTML = '<img src="/fnaf_1_logo_by_esoteriques_df2b7us-fullview-2719929492.jpg" style="width: 80px; height: 80px;" alt="Five Nights at Freddy\'s">';
-        
-        fnafStoreApp.querySelector('.store-app-button').addEventListener('click', () => {
-            const button = fnafStoreApp.querySelector('.store-app-button');
-            if (button.textContent === 'Get') {
-                button.textContent = 'Installing...';
-                button.disabled = true;
-                
-                // Add loading animation
-                const progressBar = document.createElement('div');
-                progressBar.className = 'download-progress';
-                fnafStoreApp.querySelector('.store-app-info').appendChild(progressBar);
-                
-                // Simulate download progress
-                let progress = 0;
-                const interval = setInterval(() => {
-                    progress += 5;
-                    progressBar.style.width = `${progress}%`;
+        // Initialize Minecraft app in store
+        const minecraftApp = document.getElementById('minecraftApp');
+        if (minecraftApp) {
+            // Update the Minecraft icon in the store display
+            minecraftApp.querySelector('.store-app-image').innerHTML = '<img src="/minecraft-icon-13.png" style="width: 80px; height: 80px;" alt="Minecraft">';
+            
+            minecraftApp.querySelector('.store-app-button').addEventListener('click', () => {
+                const button = minecraftApp.querySelector('.store-app-button');
+                if (button.textContent === 'Get') {
+                    button.textContent = 'Installing...';
+                    button.disabled = true;
                     
-                    if (progress >= 100) {
-                        clearInterval(interval);
-                        setTimeout(() => {
-                            button.textContent = 'Open';
-                            button.disabled = false;
-                            progressBar.remove();
-                            showSystemNotification('Five Nights at Freddy\'s has been installed!');
-                            
-                            // Add FNAF to desktop with the image instead of svg
-                            addAppToDesktop("Five Nights at Freddy's", "");
-                        }, 500);
-                    }
-                }, 150);
-                
-                showSystemNotification('Downloading Five Nights at Freddy\'s...');
-            } else if (button.textContent === 'Open') {
-                openApp('Five Nights at Freddy\'s');
-            }
-        });
-    }
-
-    // Initialize user menu and login screen
-    initUserMenu();
-
-    // Fetch weather information
-    fetchWeatherInfo();
-
-    // Initialize Search functionality
-    initSearch();
-
-    // Initialize desktop selection
-    initDesktopSelection();
-
-    // Initialize context menu
-    initContextMenu();
-
-    // Initialize volume control
-    const volumeIcon = document.getElementById('volumeIcon');
-    const volumeSlider = document.getElementById('volumeSlider');
-    const volumeSliderInner = document.getElementById('volumeSliderInner');
-    
-    // Create an audio context and oscillator for sound testing
-    let audioContext = null;
-    let oscillator = null;
-    
-    function initAudio() {
-        if (audioContext) return;
-        audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-        oscillator.type = 'sine';
-        oscillator.frequency.value = 440;
-        gainNode.gain.value = 0.1; // Low volume
-        oscillator.start();
-        oscillator.stop(audioContext.currentTime + 0.1); // Play for 0.1 seconds
-    }
-    
-    volumeIcon.addEventListener('click', () => {
-        volumeSlider.classList.toggle('active');
-        // Play a short sound when clicking the volume icon
-        initAudio();
-    });
-    
-    volumeSlider.addEventListener('click', (e) => {
-        const sliderWidth = volumeSlider.clientWidth;
-        const clickX = e.offsetX;
-        const volume = Math.min(Math.max(clickX / sliderWidth, 0), 1);
-        volumeSliderInner.style.width = `${volume * 100}%`;
+                    // Add loading animation
+                    const progressBar = document.createElement('div');
+                    progressBar.className = 'download-progress';
+                    minecraftApp.querySelector('.store-app-info').appendChild(progressBar);
+                    
+                    // Simulate download progress
+                    let progress = 0;
+                    const interval = setInterval(() => {
+                        progress += 5;
+                        progressBar.style.width = `${progress}%`;
+                        
+                        if (progress >= 100) {
+                            clearInterval(interval);
+                            setTimeout(() => {
+                                button.textContent = 'Open';
+                                button.disabled = false;
+                                progressBar.remove();
+                                showSystemNotification('Minecraft has been installed!');
+                                
+                                // Add Minecraft to desktop with the image instead of svg
+                                addAppToDesktop("Minecraft", "");
+                            }, 500);
+                        }
+                    }, 150);
+                    
+                    showSystemNotification('Downloading Minecraft...');
+                } else if (button.textContent === 'Open') {
+                    openApp('Minecraft');
+                }
+            });
+        }
         
-        // Play a test sound at the selected volume
-        initAudio();
-        if (audioContext) {
+        // Initialize COD Zombies app in store
+        const codZombiesStoreApp = document.getElementById('codZombiesStoreApp');
+        if (codZombiesStoreApp) {
+            // Update the COD Zombies icon in the store display
+            codZombiesStoreApp.querySelector('.store-app-image').innerHTML = '<img src="/Screenshot_2025-04-04_202904-removebg-preview.png" style="width: 80px; height: 80px;" alt="COD Zombies: Portable">';
+            
+            codZombiesStoreApp.querySelector('.store-app-button').addEventListener('click', () => {
+                const button = codZombiesStoreApp.querySelector('.store-app-button');
+                if (button.textContent === 'Get') {
+                    button.textContent = 'Installing...';
+                    button.disabled = true;
+                    
+                    // Add loading animation
+                    const progressBar = document.createElement('div');
+                    progressBar.className = 'download-progress';
+                    codZombiesStoreApp.querySelector('.store-app-info').appendChild(progressBar);
+                    
+                    // Simulate download progress
+                    let progress = 0;
+                    const interval = setInterval(() => {
+                        progress += 5;
+                        progressBar.style.width = `${progress}%`;
+                        
+                        if (progress >= 100) {
+                            clearInterval(interval);
+                            setTimeout(() => {
+                                button.textContent = 'Open';
+                                button.disabled = false;
+                                progressBar.remove();
+                                showSystemNotification('COD Zombies: Portable has been installed!');
+                                
+                                // Add COD Zombies to desktop with specific icon
+                                addAppToDesktop("COD Zombies: Portable", '');
+                            }, 500);
+                        }
+                    }, 150);
+                    
+                    showSystemNotification('Downloading COD Zombies: Portable...');
+                } else if (button.textContent === 'Open') {
+                    openApp('COD Zombies: Portable');
+                }
+            });
+        }
+
+        // Initialize FNAF app in store
+        const fnafStoreApp = document.getElementById('fnafStoreApp');
+        if (fnafStoreApp) {
+            // Update the FNAF icon in the store display
+            fnafStoreApp.querySelector('.store-app-image').innerHTML = '<img src="/fnaf_1_logo_by_esoteriques_df2b7us-fullview-2719929492.jpg" style="width: 80px; height: 80px;" alt="Five Nights at Freddy\'s">';
+            
+            fnafStoreApp.querySelector('.store-app-button').addEventListener('click', () => {
+                const button = fnafStoreApp.querySelector('.store-app-button');
+                if (button.textContent === 'Get') {
+                    button.textContent = 'Installing...';
+                    button.disabled = true;
+                    
+                    // Add loading animation
+                    const progressBar = document.createElement('div');
+                    progressBar.className = 'download-progress';
+                    fnafStoreApp.querySelector('.store-app-info').appendChild(progressBar);
+                    
+                    // Simulate download progress
+                    let progress = 0;
+                    const interval = setInterval(() => {
+                        progress += 5;
+                        progressBar.style.width = `${progress}%`;
+                        
+                        if (progress >= 100) {
+                            clearInterval(interval);
+                            setTimeout(() => {
+                                button.textContent = 'Open';
+                                button.disabled = false;
+                                progressBar.remove();
+                                showSystemNotification('Five Nights at Freddy\'s has been installed!');
+                                
+                                // Add FNAF to desktop with the image instead of svg
+                                addAppToDesktop("Five Nights at Freddy's", "");
+                            }, 500);
+                        }
+                    }, 150);
+                    
+                    showSystemNotification('Downloading Five Nights at Freddy\'s...');
+                } else if (button.textContent === 'Open') {
+                    openApp('Five Nights at Freddy\'s');
+                }
+            });
+        }
+
+        // Initialize user menu and login screen
+        initUserMenu();
+
+        // Fetch weather information
+        fetchWeatherInfo();
+
+        // Initialize Search functionality
+        initSearch();
+
+        // Initialize desktop selection
+        initDesktopSelection();
+
+        // Initialize context menu
+        initContextMenu();
+
+        // Initialize volume control
+        const volumeIcon = document.getElementById('volumeIcon');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const volumeSliderInner = document.getElementById('volumeSliderInner');
+        
+        // Create an audio context and oscillator for sound testing
+        let audioContext = null;
+        let oscillator = null;
+        
+        function initAudio() {
+            if (audioContext) return;
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            oscillator = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
-            const oscillator = audioContext.createOscillator();
             oscillator.connect(gainNode);
             gainNode.connect(audioContext.destination);
-            gainNode.gain.value = volume * 0.2; // Scale volume
+            oscillator.type = 'sine';
             oscillator.frequency.value = 440;
+            gainNode.gain.value = 0.1; // Low volume
             oscillator.start();
-            oscillator.stop(audioContext.currentTime + 0.1);
+            oscillator.stop(audioContext.currentTime + 0.1); // Play for 0.1 seconds
         }
         
-        // Update volume icon based on level
-        const volumeIconPath = volumeIcon.querySelector('svg path');
-        if (volumeIconPath) {
-            if (volume < 0.3) {
-                volumeIconPath.setAttribute('d', 'M7,9V15H11L16,20V4L11,9H7Z');
-            } else if (volume < 0.7) {
-                volumeIconPath.setAttribute('d', 'M5,9V15H9L14,20V4L9,9H5M18.5,12C18.5,10.23 17.5,8.71 16,7.97V16C17.5,15.29 18.5,13.76 18.5,12Z');
-            } else {
-                volumeIconPath.setAttribute('d', 'M14,3.23V5.29C16.89,6.15 19,8.83 19,12C19,15.17 16.89,17.84 14,18.7V20.77C18,19.86 21,16.28 21,12C21,7.72 18,4.14 14,3.23M16.5,12C16.5,10.23 15.5,8.71 14,7.97V16C15.5,15.29 16.5,13.76 16.5,12M3,9V15H7L12,20V4L7,9H3Z');
+        volumeIcon.addEventListener('click', () => {
+            volumeSlider.classList.toggle('active');
+            // Play a short sound when clicking the volume icon
+            initAudio();
+        });
+        
+        volumeSlider.addEventListener('click', (e) => {
+            const sliderWidth = volumeSlider.clientWidth;
+            const clickX = e.offsetX;
+            const volume = Math.min(Math.max(clickX / sliderWidth, 0), 1);
+            volumeSliderInner.style.width = `${volume * 100}%`;
+            
+            // Play a test sound at the selected volume
+            initAudio();
+            if (audioContext) {
+                const gainNode = audioContext.createGain();
+                const oscillator = audioContext.createOscillator();
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                gainNode.gain.value = volume * 0.2; // Scale volume
+                oscillator.frequency.value = 440;
+                oscillator.start();
+                oscillator.stop(audioContext.currentTime + 0.1);
             }
-        }
-    });
-    
-    // Hide volume slider when clicking elsewhere
-    document.addEventListener('click', (e) => {
-        if (!volumeIcon.contains(e.target) && !volumeSlider.contains(e.target)) {
-            volumeSlider.classList.remove('active');
-        }
-    });
+            
+            // Update volume icon based on level
+            const volumeIconPath = volumeIcon.querySelector('svg path');
+            if (volumeIconPath) {
+                if (volume < 0.3) {
+                    volumeIconPath.setAttribute('d', 'M7,9V15H11L16,20V4L11,9H7Z');
+                } else if (volume < 0.7) {
+                    volumeIconPath.setAttribute('d', 'M5,9V15H9L14,20V4L9,9H5M18.5,12C18.5,10.23 17.5,8.71 16,7.97V16C17.5,15.29 18.5,13.76 18.5,12Z');
+                } else {
+                    volumeIconPath.setAttribute('d', 'M14,3.23V5.29C16.89,6.15 19,8.83 19,12C19,15.17 16.89,17.84 14,18.7V20.77C18,19.86 21,16.28 21,12C21,7.72 18,4.14 14,3.23M16.5,12C16.5,10.23 15.5,8.71 14,7.97V16C15.5,15.29 16.5,13.76 16.5,12M3,9V15H7L12,20V4L7,9H3Z');
+                }
+            }
+        });
+        
+        // Hide volume slider when clicking elsewhere
+        document.addEventListener('click', (e) => {
+            if (!volumeIcon.contains(e.target) && !volumeSlider.contains(e.target)) {
+                volumeSlider.classList.remove('active');
+            }
+        });
+    } catch (error) {
+        console.error('Initialization error:', error);
+        showSystemNotification('An error occurred during page load');
+    }
 });
 
 async function fetchWeatherInfo() {
@@ -345,61 +372,85 @@ function updateClock() {
 }
 
 function openApp(appName) {
-    // Deactivate existing active windows
-    const activeWindows = document.querySelectorAll('.window.active');
-    activeWindows.forEach(win => {
-        win.classList.remove('active');
-        
-        // Remove active class from corresponding taskbar icons
-        const taskbarIcons = document.querySelectorAll('.taskbar-icon');
-        taskbarIcons.forEach(icon => {
-            icon.classList.remove('active');
+    try {
+        // Deactivate existing active windows
+        const activeWindows = document.querySelectorAll('.window.active');
+        activeWindows.forEach(win => {
+            win.classList.remove('active');
         });
-    });
 
-    // Open specific app
-    if (appName === 'File Explorer') {
-        const fileExplorer = document.getElementById('fileExplorer');
-        activateWindow(fileExplorer, '.taskbar-icon svg[d*="20,18H4V8H20"]');
-    } else if (appName === 'Edge') {
-        const edgeWindow = document.getElementById('edgeWindow');
-        const edgeIframe = document.getElementById('edgeIframe');
-        edgeIframe.src = 'https://swiftgaurd-com.pages.dev/'; 
-        activateWindow(edgeWindow, '.taskbar-icon img');
-    } else if (appName === 'Settings') {
-        const settingsWindow = document.getElementById('settingsWindow');
-        activateWindow(settingsWindow, '.taskbar-icon svg[d*="3,5H9V11H3V5M5,7V9H7V7H5M11,7H21V9H11V7"]');
-    } else if (appName === 'Store') {
-        const storeWindow = document.getElementById('storeWindow');
-        activateWindow(storeWindow, '.taskbar-icon svg[d*="3,5H9V11H3V5M5,7V9H7V7H5M11,7H21V9H11V7"]');
-    } else if (appName === 'YouTube') {
-        const youtubeWindow = document.getElementById('youtubeWindow');
-        const youtubeIframe = document.getElementById('youtubeIframe');
-        youtubeIframe.src = 'https://youtube-com.pages.dev/';
-        activateWindow(youtubeWindow, '.taskbar-icon svg[d*="10,15L15.19,12L10,9V15M21.56,7.17"]');
-    } else if (appName === 'Minecraft') {
-        const minecraftWindow = document.getElementById('minecraftWindow');
-        const minecraftIframe = document.getElementById('minecraftIframe');
-        minecraftIframe.src = 'https://eaglercraft.com/mc/1.8.8-wasm/';
-        activateWindow(minecraftWindow, '.taskbar-icon svg[d*="4,2H20A2,2 0 0,1 22,4V20A2,2 0 0,1"]');
-    } else if (appName === 'COD Zombies: Portable') {
-        const codZombiesWindow = document.getElementById('codZombiesWindow');
-        const codZombiesIframe = document.getElementById('codZombiesIframe');
-        codZombiesIframe.src = 'https://d3rtzzzsiu7gdr.cloudfront.net/files/nzp-gay/index.html';
-        activateWindow(codZombiesWindow, '.taskbar-icon svg[d*="21,5C19.89,4.65 18.67,4.5 17.5,4.5C15.55"]');
-        
-        // Ensure the window is sized appropriately for the game
-        codZombiesWindow.style.width = '900px';
-        codZombiesWindow.style.height = '700px';
-    } else if (appName === 'Five Nights at Freddy\'s') {
-        const fnafWindow = document.getElementById('fnafWindow');
-        const fnafIframe = document.getElementById('fnafIframe');
-        fnafIframe.src = 'https://run3.io/popgame/fnaf/fnaf1/';
-        activateWindow(fnafWindow, '.taskbar-icon svg[d*="12,3C7.58,3 4,4.79 4,7V17C4,19.21"]');
-        
-        // Ensure the window is sized appropriately for the game
-        fnafWindow.style.width = '900px';
-        fnafWindow.style.height = '700px';
+        // Safely select and activate the specific app window
+        function safeActivateWindow(windowId, taskbarSelector) {
+            const window = document.getElementById(windowId);
+            if (window) {
+                activateWindow(window, taskbarSelector);
+                
+                // If it's a game window, ensure iframe is loaded
+                const iframe = window.querySelector('iframe');
+                if (iframe) {
+                    // Add error handling for iframe
+                    iframe.onerror = () => {
+                        showSystemNotification(`Failed to load ${appName}`);
+                    };
+                }
+            } else {
+                console.warn(`Window not found: ${windowId}`);
+                showSystemNotification(`Could not open ${appName}`);
+            }
+        }
+
+        // Specific app opening logic with error handling
+        switch(appName) {
+            case 'File Explorer':
+                safeActivateWindow('fileExplorer', '.taskbar-icon svg[d*="20,18H4V8H20"]');
+                break;
+            case 'Edge':
+                const edgeWindow = document.getElementById('edgeWindow');
+                const edgeIframe = document.getElementById('edgeIframe');
+                if (edgeIframe) {
+                    edgeIframe.src = 'https://swiftgaurd-com.pages.dev/'; 
+                }
+                safeActivateWindow('edgeWindow', '.taskbar-icon img');
+                break;
+            case 'Settings':
+                safeActivateWindow('settingsWindow', '.taskbar-icon svg[d*="3,5H9V11H3V5M5,7V9H7V7H5M11,7H21V9H11V7"]');
+                break;
+            case 'Store':
+                safeActivateWindow('storeWindow', '.taskbar-icon svg[d*="3,5H9V11H3V5M5,7V9H7V7H5M11,7H21V9H11V7"]');
+                break;
+            case 'YouTube':
+                safeActivateWindow('youtubeWindow', '.taskbar-icon svg[d*="10,15L15.19,12L10,9V15M21.56,7.17"]');
+                const youtubeIframe = document.getElementById('youtubeIframe');
+                if (youtubeIframe) {
+                    youtubeIframe.src = 'https://youtube-com.pages.dev/';
+                }
+                break;
+            case 'Minecraft':
+                safeActivateWindow('minecraftWindow', '.taskbar-icon svg[d*="4,2H20A2,2 0 0,1 22,4V20A2,2 0 0,1"]');
+                const minecraftIframe = document.getElementById('minecraftIframe');
+                if (minecraftIframe) {
+                    minecraftIframe.src = 'https://eaglercraft.com/mc/1.8.8-wasm/';
+                }
+                break;
+            case 'COD Zombies: Portable':
+                safeActivateWindow('codZombiesWindow', '.taskbar-icon svg[d*="21,5C19.89,4.65 18.67,4.5 17.5,4.5C15.55"]');
+                const codZombiesIframe = document.getElementById('codZombiesIframe');
+                if (codZombiesIframe) {
+                    codZombiesIframe.src = 'https://d3rtzzzsiu7gdr.cloudfront.net/files/nzp-gay/index.html';
+                }
+                break;
+            case 'Five Nights at Freddy\'s':
+                safeActivateWindow('fnafWindow', '.taskbar-icon svg[d*="12,3C7.58,3 4,4.79 4,7V17C4,19.21"]');
+                const fnafIframe = document.getElementById('fnafIframe');
+                if (fnafIframe) {
+                    fnafIframe.src = 'https://run3.io/popgame/fnaf/fnaf1/';
+                }
+                break;
+            // ... other cases remain the same ...
+        }
+    } catch (error) {
+        console.error(`Error opening ${appName}:`, error);
+        showSystemNotification(`Failed to open ${appName}`);
     }
 }
 
@@ -506,20 +557,33 @@ function initPowerMenu() {
 }
 
 function showSystemNotification(message) {
-    const notification = document.createElement('div');
-    notification.classList.add('system-notification');
-    notification.textContent = message;
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-        notification.classList.add('show');
-        setTimeout(() => {
-            notification.classList.remove('show');
+    try {
+        const notification = document.createElement('div');
+        notification.classList.add('system-notification');
+        notification.textContent = message;
+        document.body.appendChild(notification);
+        
+        // Use requestAnimationFrame to ensure proper DOM insertion
+        requestAnimationFrame(() => {
+            notification.classList.add('show');
+            
+            // Ensure removal even if something goes wrong
             setTimeout(() => {
-                notification.remove();
-            }, 300);
-        }, 2000);
-    }, 10);
+                try {
+                    notification.classList.remove('show');
+                    setTimeout(() => {
+                        document.body.removeChild(notification);
+                    }, 300);
+                } catch (removeError) {
+                    console.error('Error removing notification:', removeError);
+                }
+            }, 2000);
+        });
+    } catch (error) {
+        // Fallback error logging
+        console.error('Failed to show system notification:', error);
+        alert(message);  // Last resort fallback
+    }
 }
 
 function makeWindowsDraggable() {
@@ -798,11 +862,27 @@ function initUserMenu() {
         showLoginScreen();
     });
     
-    loginPassword.addEventListener('keyup', (e) => {
-        if (e.key === 'Enter') {
-            hideLoginScreen();
-        }
-    });
+    const userPin = localStorage.getItem('userPin');
+    if (userPin) {
+        loginPassword.addEventListener('keyup', (e) => {
+            if (e.key === 'Enter') {
+                if (loginPassword.value === userPin) {
+                    hideLoginScreen();
+                } else {
+                    const pinHint = localStorage.getItem('pinHint');
+                    showSystemNotification(pinHint ? `Incorrect PIN. Hint: ${pinHint}` : 'Incorrect PIN');
+                    loginPassword.value = '';
+                }
+            }
+        });
+    } else {
+        loginPassword.addEventListener('keyup', (e) => {
+            if (e.key === 'Enter') {
+                hideLoginScreen();
+                loginPassword.value = '';
+            }
+        });
+    }
     
     // Update login screen time
     function updateLoginClock() {
@@ -1084,7 +1164,7 @@ function initContextMenu() {
             </div>
             <div class="context-menu-item" id="personalizeMenuItem">
                 <svg viewBox="0 0 24 24">
-                    <path d="M12,16A2,2 0 0,1 14,18A2,2 0 0,1 12,20A2,2 0 0,1 10,18A2,2 0 0,1 12,16M12,10A2,2 0 0,1 14,12A2,2 0 0,1 12,14A2,2 0 0,1 10,12A2,2 0 0,1 12,10M12,4A2,2 0 0,1 14,6A2,2 0 0,1 12,8A2,2 0 0,1 10,6A2,2 0 0,1 12,4Z" fill="currentColor"/>
+                    <path d="M12,16A2,2 0 0,1 14,18A2,2 0 0,1 12,20A2,2 0 0,1 10,18A2,2 0 0,1 12,16M12,10A2,2 0 0,1 14,12A2,2 0 0,1 12,14A2,2 0 0,1 10,12A2,2 0 0,1 12,10M6,9.12C7.47,9.67 9.61,10 12,10C14.39,10 16.53,9.67 18,9.12V12.41C17.38,12.18 16.64,12 15.85,12C13.18,12 11.87,13.6 10.42,15.36C9.38,16.67 8.88,17 7.65,17C6.09,17 6,15.37 6,15.37V9.12M18,14.09V16C18,16.65 16.17,18 12,18C7.83,18 6,16.65 6,16V15.36C6.64,15.67 7.14,15.91 8.08,15.91C9.89,15.91 10.56,15.28 11.89,13.6C13.16,12 14.23,10 16.15,10C16.83,10 17.45,10.03 18,10.09V14.09Z" fill="currentColor"/>
                 </svg>
                 <span>Personalize</span>
             </div>
@@ -1214,8 +1294,8 @@ function openPersonalizationPanel() {
                     <div class="background-option" data-bg="https://images.unsplash.com/photo-1546587348-d12660c30c50?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8d2luZG93cyUyMGJhY2tncm91bmR8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=1920&q=80">
                         <img src="https://images.unsplash.com/photo-1546587348-d12660c30c50?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8d2luZG93cyUyMGJhY2tncm91bmR8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=120&q=80" alt="Default">
                     </div>
-                    <div class="background-option" data-bg="https://images.unsplash.com/photo-1542331325-bebfc9b282e1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80">
-                        <img src="https://images.unsplash.com/photo-1542331325-bebfc9b282e1?ixlib=rb-4.0.3&auto=format&fit=crop&w=120&q=80" alt="Mountains">
+                    <div class="background-option" data-bg="https://images.unsplash.com/photo-1506744038136-46dc5dd0d370?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1920&q=80">
+                        <img src="https://images.unsplash.com/photo-1506744038136-46dc5dc5d370?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=120&q=80" alt="Mountains">
                     </div>
                     <div class="background-option" data-bg="https://images.unsplash.com/photo-1554147090-e1221a04a025?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80">
                         <img src="https://images.unsplash.com/photo-1554147090-e1221a04a025?ixlib=rb-4.0.3&auto=format&fit=crop&w=120&q=80" alt="Ocean">
@@ -1415,14 +1495,224 @@ function loadUserPreferences() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    // ... existing code ...
-    
-    // Initialize context menu
-    initContextMenu();
-    
-    // Load user preferences
-    loadUserPreferences();
-    
-    // ... existing code ...
+// Add a global error handler
+window.addEventListener('error', (event) => {
+    console.error('Uncaught error:', event.error);
+    showSystemNotification('An unexpected error occurred');
 });
+
+function showSetupWizard() {
+    const setupWizard = document.getElementById('setupWizard');
+    setupWizard.classList.add('active');
+    
+    initializeSetup();
+}
+
+function initializeSetup() {
+    const startSetup = document.getElementById('startSetup');
+    const nextLanguage = document.getElementById('nextLanguage');
+    const nextSecurity = document.getElementById('nextSecurity');
+    const nextGames = document.getElementById('nextGames');
+    const finishSetup = document.getElementById('finishSetup');
+    const pinInput = document.getElementById('pinInput');
+    const pinConfirm = document.getElementById('pinConfirm');
+    
+    const updateProgressDots = (stepId) => {
+        const progressDots = document.querySelectorAll('.progress-dot');
+        progressDots.forEach(dot => {
+            dot.classList.remove('active');
+            if (dot.dataset.step === stepId) {
+                dot.classList.add('active');
+            } else if (getStepIndex(dot.dataset.step) < getStepIndex(stepId)) {
+                dot.classList.add('active');
+            }
+        });
+    };
+    
+    const getStepIndex = (stepId) => {
+        const steps = ['welcomeStep', 'languageStep', 'securityStep', 'gamesStep', 'finishStep'];
+        return steps.indexOf(stepId);
+    };
+    
+    const animateTransition = (currentStepId, nextStepId) => {
+        const currentStep = document.getElementById(currentStepId);
+        const nextStep = document.getElementById(nextStepId);
+        
+        currentStep.style.opacity = '0';
+        currentStep.style.transform = 'translate(-50%, -45%)';
+        
+        setTimeout(() => {
+            currentStep.classList.remove('active');
+            nextStep.classList.add('active');
+            updateProgressDots(nextStepId);
+            
+            if (nextStepId === 'securityStep') {
+                setTimeout(() => pinInput.focus(), 300);
+            }
+        }, 300);
+    };
+    
+    pinInput.addEventListener('input', function() {
+        if (this.value.length === 4) {
+            pinConfirm.focus();
+        }
+    });
+    
+    const buttons = document.querySelectorAll('.setup-button');
+    buttons.forEach(button => {
+        button.addEventListener('mousedown', function(e) {
+            const x = e.clientX - this.getBoundingClientRect().left;
+            const y = e.clientY - this.getBoundingClientRect().top;
+            
+            const ripple = document.createElement('span');
+            ripple.style.cssText = `
+                position: absolute;
+                background: rgba(255, 255, 255, 0.7);
+                border-radius: 50%;
+                transform: scale(0);
+                animation: ripple 0.6s linear;
+                top: ${y}px;
+                left: ${x}px;
+            `;
+            
+            this.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        });
+    });
+    
+    startSetup.addEventListener('click', () => {
+        animateTransition('welcomeStep', 'languageStep');
+    });
+    
+    nextLanguage.addEventListener('click', () => {
+        const selectedLanguage = document.querySelector('input[name="language"]:checked').value;
+        localStorage.setItem('selectedLanguage', selectedLanguage);
+        animateTransition('languageStep', 'securityStep');
+    });
+    
+    nextSecurity.addEventListener('click', () => {
+        const pin = pinInput.value;
+        const pinConfirmValue = pinConfirm.value;
+        const pinHint = document.getElementById('pinHint').value;
+        const pinError = document.getElementById('pinError');
+        
+        if (pin.length !== 4 || !/^\d+$/.test(pin)) {
+            pinError.textContent = 'PIN must be exactly 4 digits';
+            pinInput.focus();
+            shake(pinInput);
+            return;
+        }
+        
+        if (pin !== pinConfirmValue) {
+            pinError.textContent = 'PINs do not match';
+            pinConfirm.focus();
+            shake(pinConfirm);
+            return;
+        }
+        
+        localStorage.setItem('userPin', pin);
+        if (pinHint) {
+            localStorage.setItem('pinHint', pinHint);
+        }
+        
+        animateTransition('securityStep', 'gamesStep');
+        pinError.textContent = '';
+    });
+    
+    function shake(element) {
+        element.style.animation = 'none';
+        setTimeout(() => {
+            element.style.animation = 'shake 0.5s';
+        }, 10);
+    }
+    
+    const styleSheet = document.styleSheets[0];
+    styleSheet.insertRule(`
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+    `, styleSheet.cssRules.length);
+    
+    nextGames.addEventListener('click', () => {
+        const selectedGames = [];
+        document.querySelectorAll('.game-option input[type="checkbox"]:checked').forEach(checkbox => {
+            selectedGames.push(checkbox.value);
+        });
+        
+        localStorage.setItem('selectedGames', JSON.stringify(selectedGames));
+        
+        document.getElementById('summaryLanguage').textContent = 
+            document.querySelector('input[name="language"]:checked').parentElement.querySelector('label').textContent;
+        
+        const gamesList = selectedGames.map(game => {
+            switch(game) {
+                case 'minecraft': return 'Minecraft';
+                case 'codZombies': return 'COD Zombies: Portable';
+                case 'fnaf': return 'Five Nights at Freddy\'s';
+                default: return '';
+            }
+        }).join(', ') || 'None selected';
+        
+        document.getElementById('summaryGames').textContent = gamesList;
+        
+        animateTransition('gamesStep', 'finishStep');
+    });
+    
+    finishSetup.addEventListener('click', () => {
+        const selectedGames = JSON.parse(localStorage.getItem('selectedGames') || '[]');
+        selectedGames.forEach(game => {
+            switch(game) {
+                case 'minecraft':
+                    addAppToDesktop("Minecraft", "");
+                    break;
+                case 'codZombies':
+                    addAppToDesktop("COD Zombies: Portable", "");
+                    break;
+                case 'fnaf':
+                    addAppToDesktop("Five Nights at Freddy's", "");
+                    break;
+            }
+        });
+        
+        localStorage.setItem('setupComplete', 'true');
+        
+        const setupWizard = document.getElementById('setupWizard');
+        setupWizard.style.opacity = '0';
+        setupWizard.style.transition = 'opacity 0.8s ease-out';
+        
+        setTimeout(() => {
+            setupWizard.classList.remove('active');
+            setupWizard.style.opacity = '1';
+            
+            const loginScreen = document.getElementById('loginScreen');
+            loginScreen.style.opacity = '0';
+            loginScreen.classList.add('active');
+            
+            setTimeout(() => {
+                loginScreen.style.opacity = '1';
+                loginScreen.style.transition = 'opacity 0.8s ease-in';
+                
+                const loginPassword = document.getElementById('loginPassword');
+                if (loginPassword) loginPassword.focus();
+                
+                showSystemNotification('Welcome to Flux OS!');
+            }, 100);
+        }, 800);
+    });
+    
+    document.querySelectorAll('.progress-dot').forEach(dot => {
+        dot.addEventListener('click', () => {
+            const targetStep = dot.dataset.step;
+            const currentStep = document.querySelector('.setup-step.active').id;
+            
+            if (getStepIndex(targetStep) < getStepIndex(currentStep)) {
+                animateTransition(currentStep, targetStep);
+            }
+        });
+    });
+}
