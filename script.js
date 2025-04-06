@@ -1164,7 +1164,7 @@ function initContextMenu() {
             </div>
             <div class="context-menu-item" id="personalizeMenuItem">
                 <svg viewBox="0 0 24 24">
-                    <path d="M12,16A2,2 0 0,1 14,18A2,2 0 0,1 12,20A2,2 0 0,1 10,18A2,2 0 0,1 12,16M12,10A2,2 0 0,1 14,12A2,2 0 0,1 12,14A2,2 0 0,1 10,12A2,2 0 0,1 12,10M6,9.12C7.47,9.67 9.61,10 12,10C14.39,10 16.53,9.67 18,9.12V12.41C17.38,12.18 16.64,12 15.85,12C13.18,12 11.87,13.6 10.42,15.36C9.38,16.67 8.88,17 7.65,17C6.09,17 6,15.37 6,15.37V9.12M18,14.09V16C18,16.65 16.17,18 12,18C7.83,18 6,16.65 6,16V15.36C6.64,15.67 7.14,15.91 8.08,15.91C9.89,15.91 10.56,15.28 11.89,13.6C13.16,12 14.23,10 16.15,10C16.83,10 17.45,10.03 18,10.09V14.09Z" fill="currentColor"/>
+                    <path d="M12,16A2,2 0 0,1 14,18A2,2 0 0,1 12,20A2,2 0 0,1 10,18A2,2 0 0,1 12,16M12,10A2,2 0 0,1 14,12A2,2 0 0,1 12,14A2,2 0 0,1 10,12A2,2 0 0,1 12,10M12,4A2,2 0 0,1 14,6A2,2 0 0,1 12,8A2,2 0 0,1 10,6A2,2 0 0,1 12,4Z" fill="currentColor"/>
                 </svg>
                 <span>Personalize</span>
             </div>
@@ -1505,6 +1505,7 @@ function showSetupWizard() {
     const setupWizard = document.getElementById('setupWizard');
     setupWizard.classList.add('active');
     
+    // Initialize setup event listeners
     initializeSetup();
 }
 
@@ -1514,102 +1515,30 @@ function initializeSetup() {
     const nextSecurity = document.getElementById('nextSecurity');
     const nextGames = document.getElementById('nextGames');
     const finishSetup = document.getElementById('finishSetup');
-    const pinInput = document.getElementById('pinInput');
-    const pinConfirm = document.getElementById('pinConfirm');
-    
-    const updateProgressDots = (stepId) => {
-        const progressDots = document.querySelectorAll('.progress-dot');
-        progressDots.forEach(dot => {
-            dot.classList.remove('active');
-            if (dot.dataset.step === stepId) {
-                dot.classList.add('active');
-            } else if (getStepIndex(dot.dataset.step) < getStepIndex(stepId)) {
-                dot.classList.add('active');
-            }
-        });
-    };
-    
-    const getStepIndex = (stepId) => {
-        const steps = ['welcomeStep', 'languageStep', 'securityStep', 'gamesStep', 'finishStep'];
-        return steps.indexOf(stepId);
-    };
-    
-    const animateTransition = (currentStepId, nextStepId) => {
-        const currentStep = document.getElementById(currentStepId);
-        const nextStep = document.getElementById(nextStepId);
-        
-        currentStep.style.opacity = '0';
-        currentStep.style.transform = 'translate(-50%, -45%)';
-        
-        setTimeout(() => {
-            currentStep.classList.remove('active');
-            nextStep.classList.add('active');
-            updateProgressDots(nextStepId);
-            
-            if (nextStepId === 'securityStep') {
-                setTimeout(() => pinInput.focus(), 300);
-            }
-        }, 300);
-    };
-    
-    pinInput.addEventListener('input', function() {
-        if (this.value.length === 4) {
-            pinConfirm.focus();
-        }
-    });
-    
-    const buttons = document.querySelectorAll('.setup-button');
-    buttons.forEach(button => {
-        button.addEventListener('mousedown', function(e) {
-            const x = e.clientX - this.getBoundingClientRect().left;
-            const y = e.clientY - this.getBoundingClientRect().top;
-            
-            const ripple = document.createElement('span');
-            ripple.style.cssText = `
-                position: absolute;
-                background: rgba(255, 255, 255, 0.7);
-                border-radius: 50%;
-                transform: scale(0);
-                animation: ripple 0.6s linear;
-                top: ${y}px;
-                left: ${x}px;
-            `;
-            
-            this.appendChild(ripple);
-            
-            setTimeout(() => {
-                ripple.remove();
-            }, 600);
-        });
-    });
     
     startSetup.addEventListener('click', () => {
-        animateTransition('welcomeStep', 'languageStep');
+        goToStep('welcomeStep', 'languageStep');
     });
     
     nextLanguage.addEventListener('click', () => {
         const selectedLanguage = document.querySelector('input[name="language"]:checked').value;
         localStorage.setItem('selectedLanguage', selectedLanguage);
-        animateTransition('languageStep', 'securityStep');
+        goToStep('languageStep', 'securityStep');
     });
     
     nextSecurity.addEventListener('click', () => {
-        const pin = pinInput.value;
-        const pinConfirmValue = pinConfirm.value;
+        const pin = document.getElementById('pinInput').value;
+        const pinConfirm = document.getElementById('pinConfirm').value;
         const pinHint = document.getElementById('pinHint').value;
         const pinError = document.getElementById('pinError');
         
         if (pin.length !== 4 || !/^\d+$/.test(pin)) {
-            pinError.textContent = 'PIN must be exactly 4 digits';
-            pinInput.focus();
-            shake(pinInput);
+            pinError.textContent = 'PIN must be 4 digits';
             return;
         }
         
-        if (pin !== pinConfirmValue) {
+        if (pin !== pinConfirm) {
             pinError.textContent = 'PINs do not match';
-            pinConfirm.focus();
-            shake(pinConfirm);
             return;
         }
         
@@ -1618,25 +1547,8 @@ function initializeSetup() {
             localStorage.setItem('pinHint', pinHint);
         }
         
-        animateTransition('securityStep', 'gamesStep');
-        pinError.textContent = '';
+        goToStep('securityStep', 'gamesStep');
     });
-    
-    function shake(element) {
-        element.style.animation = 'none';
-        setTimeout(() => {
-            element.style.animation = 'shake 0.5s';
-        }, 10);
-    }
-    
-    const styleSheet = document.styleSheets[0];
-    styleSheet.insertRule(`
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-            20%, 40%, 60%, 80% { transform: translateX(5px); }
-        }
-    `, styleSheet.cssRules.length);
     
     nextGames.addEventListener('click', () => {
         const selectedGames = [];
@@ -1646,6 +1558,7 @@ function initializeSetup() {
         
         localStorage.setItem('selectedGames', JSON.stringify(selectedGames));
         
+        // Update summary
         document.getElementById('summaryLanguage').textContent = 
             document.querySelector('input[name="language"]:checked').parentElement.querySelector('label').textContent;
         
@@ -1660,10 +1573,11 @@ function initializeSetup() {
         
         document.getElementById('summaryGames').textContent = gamesList;
         
-        animateTransition('gamesStep', 'finishStep');
+        goToStep('gamesStep', 'finishStep');
     });
     
     finishSetup.addEventListener('click', () => {
+        // Install selected games
         const selectedGames = JSON.parse(localStorage.getItem('selectedGames') || '[]');
         selectedGames.forEach(game => {
             switch(game) {
@@ -1679,40 +1593,19 @@ function initializeSetup() {
             }
         });
         
+        // Mark setup as complete
         localStorage.setItem('setupComplete', 'true');
         
-        const setupWizard = document.getElementById('setupWizard');
-        setupWizard.style.opacity = '0';
-        setupWizard.style.transition = 'opacity 0.8s ease-out';
+        // Hide setup wizard and show login screen
+        document.getElementById('setupWizard').classList.remove('active');
+        document.getElementById('loginScreen').classList.add('active');
         
-        setTimeout(() => {
-            setupWizard.classList.remove('active');
-            setupWizard.style.opacity = '1';
-            
-            const loginScreen = document.getElementById('loginScreen');
-            loginScreen.style.opacity = '0';
-            loginScreen.classList.add('active');
-            
-            setTimeout(() => {
-                loginScreen.style.opacity = '1';
-                loginScreen.style.transition = 'opacity 0.8s ease-in';
-                
-                const loginPassword = document.getElementById('loginPassword');
-                if (loginPassword) loginPassword.focus();
-                
-                showSystemNotification('Welcome to Flux OS!');
-            }, 100);
-        }, 800);
+        // Show welcome notification
+        showSystemNotification('Welcome to Flux OS!');
     });
-    
-    document.querySelectorAll('.progress-dot').forEach(dot => {
-        dot.addEventListener('click', () => {
-            const targetStep = dot.dataset.step;
-            const currentStep = document.querySelector('.setup-step.active').id;
-            
-            if (getStepIndex(targetStep) < getStepIndex(currentStep)) {
-                animateTransition(currentStep, targetStep);
-            }
-        });
-    });
+}
+
+function goToStep(currentStepId, nextStepId) {
+    document.getElementById(currentStepId).classList.remove('active');
+    document.getElementById(nextStepId).classList.add('active');
 }
