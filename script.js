@@ -1136,12 +1136,6 @@ function initContextMenu() {
         menu.className = 'context-menu';
         
         menu.innerHTML = `
-            <div class="context-menu-item" id="sortByMenuItem">
-                <svg viewBox="0 0 24 24">
-                    <path d="M3,13H15V11H3M3,6V8H21V6M3,18H9V16H3V18Z" fill="currentColor"/>
-                </svg>
-                <span>Sort by</span>
-            </div>
             <div class="context-menu-item" id="refreshMenuItem">
                 <svg viewBox="0 0 24 24">
                     <path d="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z" fill="currentColor"/>
@@ -1174,11 +1168,6 @@ function initContextMenu() {
         contextMenu = menu;
         
         // Add event listeners to menu items
-        document.getElementById('sortByMenuItem').addEventListener('click', () => {
-            showSystemNotification('Sort options');
-            hideContextMenu();
-        });
-        
         document.getElementById('refreshMenuItem').addEventListener('click', () => {
             showSystemNotification('Refreshing desktop...');
             hideContextMenu();
@@ -1199,8 +1188,30 @@ function initContextMenu() {
         });
         
         document.getElementById('newMenuItem').addEventListener('click', () => {
-            showSystemNotification('New item options');
+            showSystemNotification('Creating new desktop...');
             hideContextMenu();
+            
+            // Show loading animation
+            const loadingOverlay = document.createElement('div');
+            loadingOverlay.className = 'loading-overlay';
+            loadingOverlay.innerHTML = `
+                <div class="loading-spinner"></div>
+            `;
+            document.body.appendChild(loadingOverlay);
+            
+            // Simulate creating a new desktop
+            setTimeout(() => {
+                loadingOverlay.remove();
+                
+                // Clear desktop of all installed apps
+                const desktopIcons = document.querySelector('.desktop-icons');
+                const installedApps = desktopIcons.querySelectorAll('.icon:not([data-name="Recycle Bin"]):not([data-name="File Explorer"]):not([data-name="Edge"])');
+                installedApps.forEach(app => {
+                    app.remove();
+                });
+                
+                showSystemNotification('New desktop created');
+            }, 2000);
         });
         
         document.getElementById('displaySettingsMenuItem').addEventListener('click', () => {
@@ -1597,6 +1608,9 @@ function initializeSetup() {
         // Mark setup as complete
         localStorage.setItem('setupComplete', 'true');
         
+        // Apply language to desktop elements
+        applyLanguageToDesktop();
+        
         // Hide setup wizard and show login screen
         document.getElementById('setupWizard').classList.remove('active');
         document.getElementById('loginScreen').classList.add('active');
@@ -1639,7 +1653,16 @@ function changeLanguage(language) {
             security: "Security",
             language: "Language",
             games: "Games",
-            none: "None selected"
+            none: "None selected",
+            // Add desktop translations
+            searchWindows: "Search Windows",
+            time: "Time",
+            date: "Date",
+            weather: "Weather",
+            recycle: "Recycle Bin",
+            fileExplorer: "File Explorer",
+            settings: "Settings",
+            store: "Store"
         },
         es: {
             welcome: "Bienvenido a Flux OS",
@@ -1663,7 +1686,16 @@ function changeLanguage(language) {
             security: "Seguridad",
             language: "Idioma",
             games: "Juegos",
-            none: "Ninguno seleccionado"
+            none: "Ninguno seleccionado",
+            // Add desktop translations
+            searchWindows: "Buscar en Windows",
+            time: "Hora",
+            date: "Fecha",
+            weather: "Clima",
+            recycle: "Papelera de Reciclaje",
+            fileExplorer: "Explorador de Archivos",
+            settings: "Configuración",
+            store: "Tienda"
         },
         fr: {
             welcome: "Bienvenue sur Flux OS",
@@ -1687,7 +1719,16 @@ function changeLanguage(language) {
             security: "Sécurité",
             language: "Langue",
             games: "Jeux",
-            none: "Aucun sélectionné"
+            none: "Aucun sélectionné",
+            // Add desktop translations
+            searchWindows: "Rechercher dans Windows",
+            time: "Heure",
+            date: "Date",
+            weather: "Météo",
+            recycle: "Corbeille",
+            fileExplorer: "Explorateur de Fichiers",
+            settings: "Paramètres",
+            store: "Magasin"
         },
         de: {
             welcome: "Willkommen bei Flux OS",
@@ -1711,7 +1752,16 @@ function changeLanguage(language) {
             security: "Sicherheit",
             language: "Sprache",
             games: "Spiele",
-            none: "Keine ausgewählt"
+            none: "Keine ausgewählt",
+            // Add desktop translations
+            searchWindows: "Windows durchsuchen",
+            time: "Zeit",
+            date: "Datum",
+            weather: "Wetter",
+            recycle: "Papierkorb",
+            fileExplorer: "Datei-Explorer",
+            settings: "Einstellungen",
+            store: "Store"
         }
     };
     
@@ -1758,3 +1808,61 @@ function goToStep(currentStepId, nextStepId) {
     document.getElementById(currentStepId).classList.remove('active');
     document.getElementById(nextStepId).classList.add('active');
 }
+
+// Add new function to apply language to desktop elements
+function applyLanguageToDesktop() {
+    const language = localStorage.getItem('selectedLanguage') || 'en';
+    const translations = {
+        en: {
+            searchWindows: "Search Windows",
+            recycle: "Recycle Bin",
+            fileExplorer: "File Explorer" 
+        },
+        es: {
+            searchWindows: "Buscar en Windows",
+            recycle: "Papelera de Reciclaje",
+            fileExplorer: "Explorador de Archivos"
+        },
+        fr: {
+            searchWindows: "Rechercher dans Windows",
+            recycle: "Corbeille",
+            fileExplorer: "Explorateur de Fichiers"
+        },
+        de: {
+            searchWindows: "Windows durchsuchen",
+            recycle: "Papierkorb",
+            fileExplorer: "Datei-Explorer"
+        }
+    };
+    
+    const t = translations[language] || translations.en;
+    
+    // Update search placeholder
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.placeholder = t.searchWindows;
+    }
+    
+    // Update desktop icons text
+    const desktopIcons = document.querySelectorAll('.icon');
+    desktopIcons.forEach(icon => {
+        const name = icon.getAttribute('data-name');
+        if (name === 'Recycle Bin' && t.recycle) {
+            icon.querySelector('span').textContent = t.recycle;
+        } else if (name === 'File Explorer' && t.fileExplorer) {
+            icon.querySelector('span').textContent = t.fileExplorer;
+        }
+    });
+}
+
+// Call this function on page load too
+document.addEventListener('DOMContentLoaded', () => {
+    // ... existing code ...
+    
+    // Apply language to desktop if setup is already complete
+    if (localStorage.getItem('setupComplete')) {
+        applyLanguageToDesktop();
+    }
+    
+    // ... existing code ...
+});
