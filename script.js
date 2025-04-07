@@ -1523,6 +1523,7 @@ function initializeSetup() {
     nextLanguage.addEventListener('click', () => {
         const selectedLanguage = document.querySelector('input[name="language"]:checked').value;
         localStorage.setItem('selectedLanguage', selectedLanguage);
+        changeLanguage(selectedLanguage);
         goToStep('languageStep', 'securityStep');
     });
     
@@ -1603,6 +1604,154 @@ function initializeSetup() {
         // Show welcome notification
         showSystemNotification('Welcome to Flux OS!');
     });
+
+    // Add language selection event listeners
+    document.querySelectorAll('.language-option input[type="radio"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            const language = e.target.value;
+            changeLanguage(language);
+        });
+    });
+}
+
+// Add new function for language changing
+function changeLanguage(language) {
+    const translations = {
+        en: {
+            welcome: "Welcome to Flux OS",
+            getStarted: "Get Started",
+            chooseLanguage: "Choose your language",
+            next: "Next",
+            setPIN: "Set up your PIN",
+            pinDescription: "Create a 4-digit PIN to secure your device",
+            enterPIN: "Enter PIN",
+            confirmPIN: "Confirm PIN",
+            pinHint: "PIN hint (optional)",
+            chooseGames: "Choose your favorite games",
+            gamesDescription: "Select the games you'd like to have pre-installed",
+            setupComplete: "Setup Complete!",
+            setupReady: "Your system is ready to use.",
+            summaryLanguage: "Language:",
+            summarySecurity: "Security:",
+            summaryGames: "Games:",
+            pinProtection: "PIN Protection Enabled",
+            startFluxOS: "Start Flux OS",
+            security: "Security",
+            language: "Language",
+            games: "Games",
+            none: "None selected"
+        },
+        es: {
+            welcome: "Bienvenido a Flux OS",
+            getStarted: "Comenzar",
+            chooseLanguage: "Elige tu idioma",
+            next: "Siguiente",
+            setPIN: "Configura tu PIN",
+            pinDescription: "Crea un PIN de 4 dígitos para proteger tu dispositivo",
+            enterPIN: "Ingresar PIN",
+            confirmPIN: "Confirmar PIN",
+            pinHint: "Pista de PIN (opcional)",
+            chooseGames: "Elige tus juegos favoritos",
+            gamesDescription: "Selecciona los juegos que te gustaría tener preinstalados",
+            setupComplete: "¡Configuración Completa!",
+            setupReady: "Tu sistema está listo para usar.",
+            summaryLanguage: "Idioma:",
+            summarySecurity: "Seguridad:",
+            summaryGames: "Juegos:",
+            pinProtection: "Protección con PIN Activada",
+            startFluxOS: "Iniciar Flux OS",
+            security: "Seguridad",
+            language: "Idioma",
+            games: "Juegos",
+            none: "Ninguno seleccionado"
+        },
+        fr: {
+            welcome: "Bienvenue sur Flux OS",
+            getStarted: "Commencer",
+            chooseLanguage: "Choisissez votre langue",
+            next: "Suivant",
+            setPIN: "Configurez votre code PIN",
+            pinDescription: "Créez un code PIN à 4 chiffres pour sécuriser votre appareil",
+            enterPIN: "Entrez le code PIN",
+            confirmPIN: "Confirmez le code PIN",
+            pinHint: "Indice PIN (facultatif)",
+            chooseGames: "Choisissez vos jeux préférés",
+            gamesDescription: "Sélectionnez les jeux que vous souhaitez préinstaller",
+            setupComplete: "Configuration terminée !",
+            setupReady: "Votre système est prêt à être utilisé.",
+            summaryLanguage: "Langue:",
+            summarySecurity: "Sécurité:",
+            summaryGames: "Jeux:",
+            pinProtection: "Protection par code PIN activée",
+            startFluxOS: "Démarrer Flux OS",
+            security: "Sécurité",
+            language: "Langue",
+            games: "Jeux",
+            none: "Aucun sélectionné"
+        },
+        de: {
+            welcome: "Willkommen bei Flux OS",
+            getStarted: "Beginnen",
+            chooseLanguage: "Wählen Sie Ihre Sprache",
+            next: "Weiter",
+            setPIN: "Richten Sie Ihre PIN ein",
+            pinDescription: "Erstellen Sie eine 4-stellige PIN, um Ihr Gerät zu sichern",
+            enterPIN: "PIN eingeben",
+            confirmPIN: "PIN bestätigen",
+            pinHint: "PIN-Hinweis (optional)",
+            chooseGames: "Wählen Sie Ihre Lieblingsspiele",
+            gamesDescription: "Wählen Sie die Spiele aus, die Sie vorinstalliert haben möchten",
+            setupComplete: "Einrichtung abgeschlossen!",
+            setupReady: "Ihr System ist einsatzbereit.",
+            summaryLanguage: "Sprache:",
+            summarySecurity: "Sicherheit:",
+            summaryGames: "Spiele:",
+            pinProtection: "PIN-Schutz aktiviert",
+            startFluxOS: "Flux OS starten",
+            security: "Sicherheit",
+            language: "Sprache",
+            games: "Spiele",
+            none: "Keine ausgewählt"
+        }
+    };
+    
+    if (!translations[language]) return;
+    
+    const t = translations[language];
+    
+    // Update welcome screen
+    document.querySelector('#welcomeStep h1').textContent = t.welcome;
+    document.querySelector('#welcomeStep p').textContent = t.getStarted;
+    document.querySelector('#startSetup').textContent = t.getStarted;
+    
+    // Update language screen
+    document.querySelector('#languageStep h2').textContent = t.chooseLanguage;
+    document.querySelector('#nextLanguage').textContent = t.next;
+    
+    // Update security screen
+    document.querySelector('#securityStep h2').textContent = t.setPIN;
+    document.querySelector('#securityStep p').textContent = t.pinDescription;
+    document.querySelector('#pinInput').placeholder = t.enterPIN;
+    document.querySelector('#pinConfirm').placeholder = t.confirmPIN;
+    document.querySelector('#pinHint').placeholder = t.pinHint;
+    document.querySelector('#nextSecurity').textContent = t.next;
+    
+    // Update games screen
+    document.querySelector('#gamesStep h2').textContent = t.chooseGames;
+    document.querySelector('#gamesStep p').textContent = t.gamesDescription;
+    document.querySelector('#nextGames').textContent = t.next;
+    
+    // Update finish screen
+    document.querySelector('#finishStep h2').textContent = t.setupComplete;
+    document.querySelector('#finishStep p').textContent = t.setupReady;
+    document.querySelector('#summaryLanguage').previousElementSibling.textContent = t.summaryLanguage;
+    document.querySelector('.summary-item:nth-child(2) span:first-child').textContent = t.summarySecurity;
+    document.querySelector('.summary-item:nth-child(2) span:last-child').textContent = t.pinProtection;
+    document.querySelector('#summaryGames').previousElementSibling.textContent = t.summaryGames;
+    document.querySelector('#finishSetup').textContent = t.startFluxOS;
+    
+    // Store selected language
+    localStorage.setItem('selectedLanguage', language);
 }
 
 function goToStep(currentStepId, nextStepId) {
