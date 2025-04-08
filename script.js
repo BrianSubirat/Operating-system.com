@@ -842,6 +842,8 @@ function initUserMenu() {
     const signOut = document.getElementById('signOut');
     const loginScreen = document.getElementById('loginScreen');
     const loginPassword = document.getElementById('loginPassword');
+    const loginAccessibility = document.querySelector('.login-option:first-child');
+    const loginPower = document.querySelector('.login-option:last-child');
     
     userProfile.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -859,7 +861,22 @@ function initUserMenu() {
     });
     
     signOut.addEventListener('click', () => {
-        showLoginScreen();
+        showConfirmDialog("Are you sure? You can't undo this.", () => {
+            // Show loading animation
+            const loadingOverlay = document.createElement('div');
+            loadingOverlay.className = 'loading-overlay';
+            loadingOverlay.innerHTML = `
+                <div class="loading-spinner"></div>
+            `;
+            document.body.appendChild(loadingOverlay);
+            
+            // Clear local storage and show setup wizard
+            setTimeout(() => {
+                localStorage.removeItem('setupComplete');
+                loadingOverlay.remove();
+                showSetupWizard();
+            }, 2000);
+        });
     });
     
     const userPin = localStorage.getItem('userPin');
@@ -915,7 +932,205 @@ function initUserMenu() {
     // Initialize login screen time
     updateLoginClock();
     setInterval(updateLoginClock, 60000);
+    
+    // Initialize login accessibility option
+    if (loginAccessibility) {
+        loginAccessibility.addEventListener('click', () => {
+            showAccessibilityMenu();
+        });
+    }
+    
+    // Initialize login power option
+    if (loginPower) {
+        loginPower.addEventListener('click', () => {
+            showLoginPowerMenu();
+        });
+    }
 }
+
+// ... existing code ...
+
+// Add these new functions before the end of the file
+function showAccessibilityMenu() {
+    // Remove any existing menu
+    removeExistingLoginMenus();
+    
+    const menu = document.createElement('div');
+    menu.className = 'login-popup-menu accessibility-menu';
+    menu.innerHTML = `
+        <div class="login-popup-item">
+            <span>High Contrast</span>
+            <label class="login-toggle">
+                <input type="checkbox">
+                <span class="login-toggle-slider"></span>
+            </label>
+        </div>
+        <div class="login-popup-item">
+            <span>Screen Reader</span>
+            <label class="login-toggle">
+                <input type="checkbox">
+                <span class="login-toggle-slider"></span>
+            </label>
+        </div>
+        <div class="login-popup-item">
+            <span>Magnifier</span>
+            <label class="login-toggle">
+                <input type="checkbox">
+                <span class="login-toggle-slider"></span>
+            </label>
+        </div>
+        <div class="login-popup-item">
+            <span>Keyboard Narrator</span>
+            <label class="login-toggle">
+                <input type="checkbox">
+                <span class="login-toggle-slider"></span>
+            </label>
+        </div>
+    `;
+    
+    document.body.appendChild(menu);
+    
+    // Position the menu
+    const accessibilityButton = document.querySelector('.login-option:first-child');
+    const rect = accessibilityButton.getBoundingClientRect();
+    menu.style.left = `${rect.left}px`;
+    menu.style.top = `${rect.top - menu.offsetHeight - 10}px`;
+    
+    // Add toggle functionality
+    menu.querySelectorAll('.login-toggle input').forEach(toggle => {
+        toggle.addEventListener('change', (e) => {
+            const feature = e.target.closest('.login-popup-item').querySelector('span').textContent;
+            showSystemNotification(`${feature}: ${e.target.checked ? 'On' : 'Off'}`);
+            
+            if (feature === 'High Contrast' && e.target.checked) {
+                document.body.classList.add('high-contrast');
+            } else if (feature === 'High Contrast' && !e.target.checked) {
+                document.body.classList.remove('high-contrast');
+            }
+        });
+    });
+    
+    // Close menu when clicking outside
+    document.addEventListener('click', closeLoginMenus);
+}
+
+function showLoginPowerMenu() {
+    // Remove any existing menu
+    removeExistingLoginMenus();
+    
+    const menu = document.createElement('div');
+    menu.className = 'login-popup-menu power-menu';
+    menu.innerHTML = `
+        <div class="login-popup-item" id="loginShutdown">
+            <svg viewBox="0 0 24 24">
+                <path d="M13,3H11V13H13V3M17.83,5.17L16.41,6.59C17.99,7.86 19,9.81 19,12C19,15.87 15.87,19 12,19C8.13,19 5,15.87 5,12C5,9.81 6.01,7.86 7.58,6.58L6.17,5.17C4.23,6.82 3,9.26 3,12C3,16.97 7.03,21 12,21C16.97,21 21,16.97 21,12C21,9.26 19.77,6.82 17.83,5.17Z" fill="currentColor"/>
+            </svg>
+            <span>Shut down</span>
+        </div>
+        <div class="login-popup-item" id="loginRestart">
+            <svg viewBox="0 0 24 24">
+                <path d="M12,4C14.1,4 16.1,4.8 17.6,6.3C20.7,9.4 20.7,14.5 17.6,17.6C15.8,19.5 13.3,20.2 10.9,19.9L11.4,17.9C13.1,18.1 14.9,17.5 16.2,16.2C18.5,13.9 18.5,10.1 16.2,7.7C15.1,6.6 13.5,6 12,6V10.6L7,5.6L12,0.6V4M6.3,17.6C4.62,15.5 4,13.82 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,13.82 19.38,15.5 18.36,16.83M3,5H1V21A2,2 0 0,0 3,23H19A2,2 0 0,0 21,21V5L3,5Z" fill="currentColor"/>
+            </svg>
+            <span>Restart</span>
+        </div>
+        <div class="login-popup-item" id="loginSleep">
+            <svg viewBox="0 0 24 24">
+                <path d="M19,7H11V13H19V7M21,5V19A2,2 0 0,1 19,21H5A2,2 0 0,1 3,19V5A2,2 0 0,1 5,3H19A2,2 0 0,1 21,5M3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5L3,5Z" fill="currentColor"/>
+            </svg>
+            <span>Sleep</span>
+        </div>
+    `;
+    
+    document.body.appendChild(menu);
+    
+    // Position the menu
+    const powerButton = document.querySelector('.login-option:last-child');
+    const rect = powerButton.getBoundingClientRect();
+    menu.style.left = `${rect.left}px`;
+    menu.style.top = `${rect.top - menu.offsetHeight - 10}px`;
+    
+    // Add click handlers
+    document.getElementById('loginShutdown').addEventListener('click', () => {
+        showSystemNotification('Shutting down...');
+        setTimeout(() => {
+            document.body.style.opacity = '0';
+            document.body.style.transition = 'opacity 2s';
+        }, 1000);
+        closeLoginMenus();
+    });
+    
+    document.getElementById('loginRestart').addEventListener('click', () => {
+        showSystemNotification('Restarting...');
+        setTimeout(() => {
+            document.body.style.opacity = '0';
+            document.body.style.transition = 'opacity 1s';
+            setTimeout(() => {
+                document.body.style.opacity = '1';
+                showSystemNotification('System restarted');
+            }, 2000);
+        }, 1000);
+        closeLoginMenus();
+    });
+    
+    document.getElementById('loginSleep').addEventListener('click', () => {
+        showSystemNotification('Entering sleep mode...');
+        
+        // Create sleep overlay
+        const sleepOverlay = document.createElement('div');
+        sleepOverlay.className = 'sleep-overlay';
+        document.body.appendChild(sleepOverlay);
+        
+        // Fade in the overlay
+        setTimeout(() => {
+            sleepOverlay.style.opacity = '1';
+            
+            // Add click handler to wake from sleep
+            sleepOverlay.addEventListener('click', () => {
+                sleepOverlay.style.opacity = '0';
+                setTimeout(() => {
+                    sleepOverlay.remove();
+                    showSystemNotification('Waking from sleep...');
+                }, 500);
+            });
+        }, 100);
+        
+        closeLoginMenus();
+    });
+    
+    // Close menu when clicking outside
+    document.addEventListener('click', closeLoginMenus);
+}
+
+function removeExistingLoginMenus() {
+    const existingMenus = document.querySelectorAll('.login-popup-menu');
+    existingMenus.forEach(menu => menu.remove());
+}
+
+function closeLoginMenus(e) {
+    const menus = document.querySelectorAll('.login-popup-menu');
+    const loginOptions = document.querySelectorAll('.login-option');
+    
+    let clickedOnMenu = false;
+    menus.forEach(menu => {
+        if (menu.contains(e?.target)) {
+            clickedOnMenu = true;
+        }
+    });
+    
+    let clickedOnOption = false;
+    loginOptions.forEach(option => {
+        if (option.contains(e?.target)) {
+            clickedOnOption = true;
+        }
+    });
+    
+    if (!clickedOnMenu && !clickedOnOption) {
+        removeExistingLoginMenus();
+        document.removeEventListener('click', closeLoginMenus);
+    }
+}
+
+// ... existing code ...
 
 function addAppToDesktop(appName, svgPath) {
     const desktopIcons = document.querySelector('.desktop-icons');
@@ -1660,9 +1875,7 @@ function changeLanguage(language) {
             date: "Date",
             weather: "Weather",
             recycle: "Recycle Bin",
-            fileExplorer: "File Explorer",
-            settings: "Settings",
-            store: "Store"
+            fileExplorer: "File Explorer" 
         },
         es: {
             welcome: "Bienvenido a Flux OS",
@@ -1689,13 +1902,8 @@ function changeLanguage(language) {
             none: "Ninguno seleccionado",
             // Add desktop translations
             searchWindows: "Buscar en Windows",
-            time: "Hora",
-            date: "Fecha",
-            weather: "Clima",
             recycle: "Papelera de Reciclaje",
-            fileExplorer: "Explorador de Archivos",
-            settings: "Configuración",
-            store: "Tienda"
+            fileExplorer: "Explorador de Archivos"
         },
         fr: {
             welcome: "Bienvenue sur Flux OS",
@@ -1722,13 +1930,8 @@ function changeLanguage(language) {
             none: "Aucun sélectionné",
             // Add desktop translations
             searchWindows: "Rechercher dans Windows",
-            time: "Heure",
-            date: "Date",
-            weather: "Météo",
             recycle: "Corbeille",
-            fileExplorer: "Explorateur de Fichiers",
-            settings: "Paramètres",
-            store: "Magasin"
+            fileExplorer: "Explorateur de Fichiers"
         },
         de: {
             welcome: "Willkommen bei Flux OS",
@@ -1755,13 +1958,8 @@ function changeLanguage(language) {
             none: "Keine ausgewählt",
             // Add desktop translations
             searchWindows: "Windows durchsuchen",
-            time: "Zeit",
-            date: "Datum",
-            weather: "Wetter",
             recycle: "Papierkorb",
-            fileExplorer: "Datei-Explorer",
-            settings: "Einstellungen",
-            store: "Store"
+            fileExplorer: "Datei-Explorer"
         }
     };
     
@@ -1866,3 +2064,39 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // ... existing code ...
 });
+
+function showConfirmDialog(message, confirmCallback) {
+    // Remove any existing dialog
+    const existingDialog = document.querySelector('.confirm-dialog-container');
+    if (existingDialog) {
+        existingDialog.remove();
+    }
+    
+    // Create dialog container
+    const dialogContainer = document.createElement('div');
+    dialogContainer.className = 'confirm-dialog-container';
+    
+    // Create dialog
+    dialogContainer.innerHTML = `
+        <div class="confirm-dialog">
+            <div class="confirm-message">${message}</div>
+            <div class="confirm-buttons">
+                <button class="confirm-button confirm-yes">Yes</button>
+                <button class="confirm-button confirm-no">No</button>
+            </div>
+        </div>
+    `;
+    
+    // Add to document
+    document.body.appendChild(dialogContainer);
+    
+    // Add event listeners
+    dialogContainer.querySelector('.confirm-yes').addEventListener('click', () => {
+        dialogContainer.remove();
+        if (confirmCallback) confirmCallback();
+    });
+    
+    dialogContainer.querySelector('.confirm-no').addEventListener('click', () => {
+        dialogContainer.remove();
+    });
+}
