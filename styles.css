@@ -2185,3 +2185,105 @@ body {
 .high-contrast {
     filter: contrast(150%) brightness(120%);
 }
+
+.no-files-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    color: #666;
+    text-align: center;
+    padding: 20px;
+}
+
+.no-files-message p {
+    font-size: 16px;
+    margin-top: 0;
+}
+
+.download-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    text-align: center;
+}
+
+.download-item:hover {
+    background-color: var(--hover-bg);
+}
+
+/* Add resize handles styling */
+.resize-handle {
+    position: absolute;
+    z-index: 1000;
+}
+
+.resize-n {
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 5px;
+    cursor: n-resize;
+}
+
+.resize-e {
+    top: 0;
+    right: 0;
+    width: 5px;
+    height: 100%;
+    cursor: e-resize;
+}
+
+.resize-s {
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 5px;
+    cursor: s-resize;
+}
+
+.resize-w {
+    top: 0;
+    left: 0;
+    width: 5px;
+    height: 100%;
+    cursor: w-resize;
+}
+
+.resize-ne {
+    top: 0;
+    right: 0;
+    width: 10px;
+    height: 10px;
+    cursor: ne-resize;
+}
+
+.resize-se {
+    bottom: 0;
+    right: 0;
+    width: 10px;
+    height: 10px;
+    cursor: se-resize;
+}
+
+.resize-sw {
+    bottom: 0;
+    left: 0;
+    width: 10px;
+    height: 10px;
+    cursor: sw-resize;
+}
+
+.resize-nw {
+    top: 0;
+    left: 0;
+    width: 10px;
+    height: 10px;
+    cursor: nw-resize;
+}

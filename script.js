@@ -62,6 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
         initTaskbarIcons();
 
         // Initialize File Explorer
+        initFileExplorer();
         const fileExplorer = document.getElementById('fileExplorer');
         
         // Make windows draggable
@@ -328,6 +329,21 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('Initialization error:', error);
         showSystemNotification('An error occurred during page load');
     }
+    
+    // Apply saved brightness and night light settings
+    const savedBrightness = localStorage.getItem('brightness');
+    if (savedBrightness) {
+        document.documentElement.style.filter = `brightness(${savedBrightness / 100})`;
+    }
+    
+    if (localStorage.getItem('nightLight') === 'on') {
+        document.documentElement.style.filter = (document.documentElement.style.filter || '') + ' sepia(30%)';
+    }
+    
+    // Apply language to desktop if setup is already complete
+    if (localStorage.getItem('setupComplete')) {
+        applyLanguageToDesktop();
+    }
 });
 
 async function fetchWeatherInfo() {
@@ -479,6 +495,8 @@ function initTaskbarIcons() {
             // File Explorer
             if (svgPath.includes('20,18H4V8H20')) {
                 toggleWindow('fileExplorer', icon);
+                // Reset file explorer to default view when opening
+                resetFileExplorer();
             } 
             // Edge
             else if (svgPath.includes('21.86,12.5C21.1,11.63')) {
@@ -617,6 +635,81 @@ function makeWindowsDraggable() {
         document.addEventListener('mouseup', () => {
             isDragging = false;
         });
+        
+        // Add resize functionality
+        makeWindowResizable(win);
+    });
+}
+
+// Add new function for window resizing
+function makeWindowResizable(windowElement) {
+    const minWidth = 400;
+    const minHeight = 300;
+    
+    // Create resize handles
+    const positions = ['n', 'e', 's', 'w', 'ne', 'se', 'sw', 'nw'];
+    
+    positions.forEach(pos => {
+        const handle = document.createElement('div');
+        handle.className = `resize-handle resize-${pos}`;
+        windowElement.appendChild(handle);
+        
+        let startX, startY, startWidth, startHeight, startLeft, startTop;
+        
+        const mouseDownHandler = function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            startX = e.clientX;
+            startY = e.clientY;
+            startWidth = parseInt(document.defaultView.getComputedStyle(windowElement).width, 10);
+            startHeight = parseInt(document.defaultView.getComputedStyle(windowElement).height, 10);
+            startLeft = parseInt(document.defaultView.getComputedStyle(windowElement).left, 10);
+            startTop = parseInt(document.defaultView.getComputedStyle(windowElement).top, 10);
+            
+            document.addEventListener('mousemove', mouseMoveHandler);
+            document.addEventListener('mouseup', mouseUpHandler);
+        };
+        
+        const mouseMoveHandler = function(e) {
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+            
+            // Resize based on the handle position
+            if (pos.includes('e')) {
+                const newWidth = startWidth + dx;
+                if (newWidth > minWidth) {
+                    windowElement.style.width = `${newWidth}px`;
+                }
+            }
+            if (pos.includes('w')) {
+                const newWidth = startWidth - dx;
+                if (newWidth > minWidth) {
+                    windowElement.style.width = `${newWidth}px`;
+                    windowElement.style.left = `${startLeft + dx}px`;
+                }
+            }
+            if (pos.includes('s')) {
+                const newHeight = startHeight + dy;
+                if (newHeight > minHeight) {
+                    windowElement.style.height = `${newHeight}px`;
+                }
+            }
+            if (pos.includes('n')) {
+                const newHeight = startHeight - dy;
+                if (newHeight > minHeight) {
+                    windowElement.style.height = `${newHeight}px`;
+                    windowElement.style.top = `${startTop + dy}px`;
+                }
+            }
+        };
+        
+        const mouseUpHandler = function() {
+            document.removeEventListener('mousemove', mouseMoveHandler);
+            document.removeEventListener('mouseup', mouseUpHandler);
+        };
+        
+        handle.addEventListener('mousedown', mouseDownHandler);
     });
 }
 
@@ -699,7 +792,7 @@ function initDeviceSettings() {
         brightnessSlider.value = 100; // Default value
         brightnessSlider.addEventListener('input', (e) => {
             const brightness = e.target.value;
-            document.body.style.filter = `brightness(${brightness / 100})`;
+            document.documentElement.style.filter = `brightness(${brightness / 100})`;
             localStorage.setItem('brightness', brightness);
             showSystemNotification(`Brightness: ${brightness}%`);
         });
@@ -708,7 +801,7 @@ function initDeviceSettings() {
         const savedBrightness = localStorage.getItem('brightness');
         if (savedBrightness) {
             brightnessSlider.value = savedBrightness;
-            document.body.style.filter = `brightness(${savedBrightness / 100})`;
+            document.documentElement.style.filter = `brightness(${savedBrightness / 100})`;
         }
     }
 
@@ -717,11 +810,11 @@ function initDeviceSettings() {
     if (nightLightToggle) {
         nightLightToggle.addEventListener('change', (e) => {
             if (e.target.checked) {
-                document.body.style.filter = document.body.style.filter + ' sepia(30%)';
+                document.documentElement.style.filter = (document.documentElement.style.filter || '') + ' sepia(30%)';
                 localStorage.setItem('nightLight', 'on');
                 showSystemNotification('Night light: On');
             } else {
-                document.body.style.filter = document.body.style.filter.replace(' sepia(30%)', '');
+                document.documentElement.style.filter = (document.documentElement.style.filter || '').replace(' sepia(30%)', '');
                 localStorage.setItem('nightLight', 'off');
                 showSystemNotification('Night light: Off');
             }
@@ -730,7 +823,7 @@ function initDeviceSettings() {
         // Load saved night light setting
         if (localStorage.getItem('nightLight') === 'on') {
             nightLightToggle.checked = true;
-            document.body.style.filter = document.body.style.filter + ' sepia(30%)';
+            document.documentElement.style.filter = (document.documentElement.style.filter || '') + ' sepia(30%)';
         }
     }
 
@@ -799,15 +892,15 @@ function initDeviceSettings() {
             localStorage.setItem('powerMode', selectedMode);
             
             if (selectedMode === 'Battery saver') {
-                document.body.style.filter = document.body.style.filter + ' brightness(0.8)';
+                document.documentElement.style.filter = document.documentElement.style.filter + ' brightness(0.8)';
                 showSystemNotification('Power mode: Battery saver');
             } else if (selectedMode === 'Best performance') {
-                document.body.style.filter = document.body.style.filter.replace(' brightness(0.8)', '');
-                document.body.style.filter = document.body.style.filter + ' brightness(1.1)';
+                document.documentElement.style.filter = document.documentElement.style.filter.replace(' brightness(0.8)', '');
+                document.documentElement.style.filter = document.documentElement.style.filter + ' brightness(1.1)';
                 showSystemNotification('Power mode: Best performance');
             } else {
-                document.body.style.filter = document.body.style.filter.replace(' brightness(0.8)', '');
-                document.body.style.filter = document.body.style.filter.replace(' brightness(1.1)', '');
+                document.documentElement.style.filter = document.documentElement.style.filter.replace(' brightness(0.8)', '');
+                document.documentElement.style.filter = document.documentElement.style.filter.replace(' brightness(1.1)', '');
                 showSystemNotification('Power mode: Balanced');
             }
         });
@@ -817,9 +910,9 @@ function initDeviceSettings() {
         if (savedPowerMode) {
             powerModeSelect.value = savedPowerMode;
             if (savedPowerMode === 'Battery saver') {
-                document.body.style.filter = document.body.style.filter + ' brightness(0.8)';
+                document.documentElement.style.filter = document.documentElement.style.filter + ' brightness(0.8)';
             } else if (savedPowerMode === 'Best performance') {
-                document.body.style.filter = document.body.style.filter + ' brightness(1.1)';
+                document.documentElement.style.filter = document.documentElement.style.filter + ' brightness(1.1)';
             }
         }
     }
@@ -948,9 +1041,6 @@ function initUserMenu() {
     }
 }
 
-// ... existing code ...
-
-// Add these new functions before the end of the file
 function showAccessibilityMenu() {
     // Remove any existing menu
     removeExistingLoginMenus();
@@ -1129,8 +1219,6 @@ function closeLoginMenus(e) {
         document.removeEventListener('click', closeLoginMenus);
     }
 }
-
-// ... existing code ...
 
 function addAppToDesktop(appName, svgPath) {
     const desktopIcons = document.querySelector('.desktop-icons');
@@ -1727,6 +1815,42 @@ window.addEventListener('error', (event) => {
     showSystemNotification('An unexpected error occurred');
 });
 
+function showConfirmDialog(message, confirmCallback) {
+    // Remove any existing dialog
+    const existingDialog = document.querySelector('.confirm-dialog-container');
+    if (existingDialog) {
+        existingDialog.remove();
+    }
+    
+    // Create dialog container
+    const dialogContainer = document.createElement('div');
+    dialogContainer.className = 'confirm-dialog-container';
+    
+    // Create dialog
+    dialogContainer.innerHTML = `
+        <div class="confirm-dialog">
+            <div class="confirm-message">${message}</div>
+            <div class="confirm-buttons">
+                <button class="confirm-button confirm-yes">Yes</button>
+                <button class="confirm-button confirm-no">No</button>
+            </div>
+        </div>
+    `;
+    
+    // Add to document
+    document.body.appendChild(dialogContainer);
+    
+    // Add event listeners
+    dialogContainer.querySelector('.confirm-yes').addEventListener('click', () => {
+        dialogContainer.remove();
+        if (confirmCallback) confirmCallback();
+    });
+    
+    dialogContainer.querySelector('.confirm-no').addEventListener('click', () => {
+        dialogContainer.remove();
+    });
+}
+
 function showSetupWizard() {
     const setupWizard = document.getElementById('setupWizard');
     setupWizard.classList.add('active');
@@ -2053,50 +2177,110 @@ function applyLanguageToDesktop() {
     });
 }
 
-// Call this function on page load too
-document.addEventListener('DOMContentLoaded', () => {
-    // ... existing code ...
-    
-    // Apply language to desktop if setup is already complete
-    if (localStorage.getItem('setupComplete')) {
-        applyLanguageToDesktop();
+function resetFileExplorer() {
+    const fileContent = document.querySelector('.file-content');
+    if (fileContent) {
+        // Reset to default view (Documents folder)
+        updateFileExplorer('documents');
     }
-    
-    // ... existing code ...
-});
+}
 
-function showConfirmDialog(message, confirmCallback) {
-    // Remove any existing dialog
-    const existingDialog = document.querySelector('.confirm-dialog-container');
-    if (existingDialog) {
-        existingDialog.remove();
+function updateFileExplorer(section) {
+    const fileContent = document.querySelector('.file-content');
+    if (!fileContent) return;
+    
+    // Clear current content
+    fileContent.innerHTML = '';
+    
+    // Update address bar
+    const breadcrumb = document.querySelector('.breadcrumb');
+    if (breadcrumb) {
+        breadcrumb.innerHTML = '<span>This PC</span><span>&gt;</span>';
     }
     
-    // Create dialog container
-    const dialogContainer = document.createElement('div');
-    dialogContainer.className = 'confirm-dialog-container';
+    if (section === 'documents' || section === 'pictures' || section === 'network') {
+        // Show no files message
+        breadcrumb.innerHTML += `<span>${section.charAt(0).toUpperCase() + section.slice(1)}</span>`;
+        
+        const noFilesMessage = document.createElement('div');
+        noFilesMessage.className = 'no-files-message';
+        noFilesMessage.innerHTML = `
+            <svg viewBox="0 0 24 24" style="width: 48px; height: 48px; margin-bottom: 16px; opacity: 0.5;">
+                <path d="M13,9H18.5L13,3.5V9M6,2H14L20,8V20A2,2 0 0,1 18,22H6C4.89,22 4,21.1 4,20V4C4,2.89 4.89,2 6,2M15,18V16H6V18H15M18,14V12H6V14H18Z" fill="currentColor"/>
+            </svg>
+            <p>No files to display</p>
+        `;
+        fileContent.appendChild(noFilesMessage);
+    } 
+    else if (section === 'downloads') {
+        // Show downloads section with installed apps
+        breadcrumb.innerHTML += '<span>Downloads</span>';
+        
+        // Get installed apps from localStorage
+        const installedApps = JSON.parse(localStorage.getItem('selectedGames') || '[]');
+        
+        if (installedApps.length === 0) {
+            const noAppsMessage = document.createElement('div');
+            noAppsMessage.className = 'no-files-message';
+            noAppsMessage.innerHTML = `
+                <svg viewBox="0 0 24 24" style="width: 48px; height: 48px; margin-bottom: 16px; opacity: 0.5;">
+                    <path d="M13,9H18.5L13,3.5V9M6,2H14L20,8V20A2,2 0 0,1 18,22H6C4.89,22 4,21.1 4,20V4C4,2.89 4.89,2 6,2M15,18V16H6V18H15M18,14V12H6V14H18Z" fill="currentColor"/>
+                </svg>
+                <p>No downloads available</p>
+            `;
+            fileContent.appendChild(noAppsMessage);
+        } else {
+            installedApps.forEach(app => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item download-item';
+                
+                let appName;
+                let imgSrc;
+                
+                switch(app) {
+                    case 'minecraft':
+                        appName = 'Minecraft';
+                        imgSrc = '/minecraft-icon-13.png';
+                        break;
+                    case 'codZombies':
+                        appName = 'COD Zombies: Portable';
+                        imgSrc = '/Screenshot_2025-04-04_202904-removebg-preview.png';
+                        break;
+                    case 'fnaf':
+                        appName = 'Five Nights at Freddy\'s';
+                        imgSrc = '/fnaf_1_logo_by_esoteriques_df2b7us-fullview-2719929492.jpg';
+                        break;
+                }
+                
+                fileItem.innerHTML = `
+                    <img src="${imgSrc}" style="width: 40px; height: 40px;" alt="${appName}">
+                    <span>${appName}</span>
+                `;
+                
+                // Make the app openable from file explorer
+                fileItem.addEventListener('dblclick', () => {
+                    openApp(appName);
+                });
+                
+                fileContent.appendChild(fileItem);
+            });
+        }
+    }
+}
+
+function initFileExplorer() {
+    const sidebarItems = document.querySelectorAll('.sidebar-item');
     
-    // Create dialog
-    dialogContainer.innerHTML = `
-        <div class="confirm-dialog">
-            <div class="confirm-message">${message}</div>
-            <div class="confirm-buttons">
-                <button class="confirm-button confirm-yes">Yes</button>
-                <button class="confirm-button confirm-no">No</button>
-            </div>
-        </div>
-    `;
-    
-    // Add to document
-    document.body.appendChild(dialogContainer);
-    
-    // Add event listeners
-    dialogContainer.querySelector('.confirm-yes').addEventListener('click', () => {
-        dialogContainer.remove();
-        if (confirmCallback) confirmCallback();
-    });
-    
-    dialogContainer.querySelector('.confirm-no').addEventListener('click', () => {
-        dialogContainer.remove();
+    sidebarItems.forEach(item => {
+        item.addEventListener('click', () => {
+            const section = item.getAttribute('data-section');
+            if (section) {
+                updateFileExplorer(section);
+                
+                // Highlight selected section
+                sidebarItems.forEach(si => si.classList.remove('active'));
+                item.classList.add('active');
+            }
+        });
     });
 }
