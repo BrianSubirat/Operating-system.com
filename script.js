@@ -2,7 +2,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // Check if setup has been completed
     if (!localStorage.getItem('setupComplete')) {
         showSetupWizard();
+    } else {
+        // Restore installed apps if setup is complete
+        restoreInstalledApps();
     }
+    
+    // Add beforeunload event listener to save state before closing
+    window.addEventListener('beforeunload', () => {
+        saveInstalledApps();
+    });
     
     // Wrap key initialization functions in try-catch blocks
     try {
@@ -1266,6 +1274,9 @@ function addAppToDesktop(appName, svgPath) {
         
         // Make desktop icons sortable again to include the new icon
         initSortable();
+        
+        // Save the updated apps list
+        saveInstalledApps();
     }
 }
 
@@ -2281,6 +2292,43 @@ function initFileExplorer() {
                 sidebarItems.forEach(si => si.classList.remove('active'));
                 item.classList.add('active');
             }
+        });
+    });
+}
+
+// Function to save installed apps to localStorage
+function saveInstalledApps() {
+    const desktopIcons = document.querySelector('.desktop-icons');
+    const installedApps = Array.from(desktopIcons.querySelectorAll('.icon')).map(icon => {
+        return {
+            name: icon.getAttribute('data-name'),
+            html: icon.innerHTML
+        };
+    }).filter(app => 
+        app.name !== 'Recycle Bin' && 
+        app.name !== 'File Explorer' && 
+        app.name !== 'Edge'
+    );
+    
+    localStorage.setItem('installedApps', JSON.stringify(installedApps));
+}
+
+// Function to restore installed apps from localStorage
+function restoreInstalledApps() {
+    const savedApps = JSON.parse(localStorage.getItem('installedApps') || '[]');
+    const desktopIcons = document.querySelector('.desktop-icons');
+    
+    savedApps.forEach(app => {
+        const appIcon = document.createElement('div');
+        appIcon.className = 'icon';
+        appIcon.setAttribute('data-name', app.name);
+        appIcon.innerHTML = app.html;
+        
+        desktopIcons.appendChild(appIcon);
+        
+        // Re-add double-click event listener
+        appIcon.addEventListener('dblclick', () => {
+            openApp(app.name);
         });
     });
 }
