@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -33,6 +34,12 @@
             <div class="icon" data-name="Edge">
                 <img src="/ChatGPT Image Apr 4, 2025, 09_11_49 PM.png" class="icon-svg" alt="Edge">
                 <span>Edge</span>
+            </div>
+            <div class="icon" data-name="GameHub">
+                <svg viewBox="0 0 24 24" class="icon-svg">
+                    <path d="M21,6H3C1.9,6 1,6.9 1,8V16C1,17.1 1.9,18 3,18H21C22.1,18 23,17.1 23,16V8C23,6.9 22.1,6 21,6M21,16H3V8H21V16M6,15H8V13H10V11H8V9H6V11H4V13H6V15M14.5,12A1.5,1.5 0 0,1 16,13.5A1.5,1.5 0 0,1 14.5,15A1.5,1.5 0 0,1 13,13.5A1.5,1.5 0 0,1 14.5,12M18.5,9A1.5,1.5 0 0,1 20,10.5A1.5,1.5 0 0,1 18.5,12A1.5,1.5 0 0,1 17,10.5A1.5,1.5 0 0,1 18.5,9Z" fill="#4CAF50"/>
+                </svg>
+                <span>Gaming Hub</span>
             </div>
             <!-- This is where installed apps will be added dynamically -->
         </div>
@@ -606,6 +613,26 @@
     </div>
 </div>
 
+<!-- GameHub Window -->
+<div class="window" id="gameHubWindow">
+    <div class="window-header">
+        <div class="window-title">
+            <svg viewBox="0 0 24 24" class="window-icon">
+                <path d="M21,6H3C1.9,6 1,6.9 1,8V16C1,17.1 1.9,18 3,18H21C22.1,18 23,17.1 23,16V8C23,6.9 22.1,6 21,6M21,16H3V8H21V16M6,15H8V13H10V11H8V9H6V11H4V13H6V15M14.5,12A1.5,1.5 0 0,1 16,13.5A1.5,1.5 0 0,1 14.5,15A1.5,1.5 0 0,1 13,13.5A1.5,1.5 0 0,1 14.5,12M18.5,9A1.5,1.5 0 0,1 20,10.5A1.5,1.5 0 0,1 18.5,12A1.5,1.5 0 0,1 17,10.5A1.5,1.5 0 0,1 18.5,9Z" fill="#4CAF50"/>
+            </svg>
+            <span>GameHub</span>
+        </div>
+        <div class="window-controls">
+            <button class="minimize">&#8211;</button>
+            <button class="maximize">&#9744;</button>
+            <button class="close">&#10005;</button>
+        </div>
+    </div>
+    <div class="window-content">
+        <iframe id="gameHubIframe" src="https://gamehub-com.pages.dev/" frameborder="0"></iframe>
+    </div>
+</div>
+
 <!-- Login Screen -->
 <div class="login-screen" id="loginScreen">
     <div class="login-background"></div>
@@ -623,7 +650,7 @@
         <div class="login-password-container">
             <input type="password" class="login-password" placeholder="Password" id="loginPassword">
         </div>
-        <div class="login-hint">Hint: Just press Enter</div>
+        <div class="login-hint"></div>
         <div class="login-options">
             <div class="login-option">
                 <svg viewBox="0 0 24 24">

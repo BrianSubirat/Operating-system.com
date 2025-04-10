@@ -66,6 +66,14 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
+        // Add GameHub icon event listener
+        const gameHubIcon = document.querySelector('.icon[data-name="GameHub"]');
+        if (gameHubIcon) {
+            gameHubIcon.addEventListener('dblclick', () => {
+                openApp('GameHub');
+            });
+        }
+
         // Initialize Taskbar Icons
         initTaskbarIcons();
 
@@ -352,6 +360,23 @@ document.addEventListener('DOMContentLoaded', () => {
     if (localStorage.getItem('setupComplete')) {
         applyLanguageToDesktop();
     }
+
+    // Add iframe styling for GameHub
+    const style = document.createElement('style');
+    style.textContent = `
+        #gameHubWindow .window-content {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+        
+        #gameHubIframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    `;
+    document.head.appendChild(style);
 });
 
 async function fetchWeatherInfo() {
@@ -468,6 +493,13 @@ function openApp(appName) {
                 const fnafIframe = document.getElementById('fnafIframe');
                 if (fnafIframe) {
                     fnafIframe.src = 'https://run3.io/popgame/fnaf/fnaf1/';
+                }
+                break;
+            case 'GameHub':
+                safeActivateWindow('gameHubWindow', '.taskbar-icon svg[d*="M21,6H3C1.9,6 1,6.9 1,8V16C1,17.1 1.9,18 3"]');
+                const gameHubIframe = document.getElementById('gameHubIframe');
+                if (gameHubIframe) {
+                    gameHubIframe.src = 'https://gamehub-com.pages.dev/';
                 }
                 break;
             // ... other cases remain the same ...
@@ -1229,55 +1261,105 @@ function closeLoginMenus(e) {
 }
 
 function addAppToDesktop(appName, svgPath) {
+    if (isAppInstalled(appName)) return; // Don't add if already exists
+    
     const desktopIcons = document.querySelector('.desktop-icons');
     
-    // Check if the app is already installed
+    const appIcon = document.createElement('div');
+    appIcon.className = 'icon';
+    appIcon.setAttribute('data-name', appName);
+    
+    if (appName === 'Minecraft') {
+        appIcon.innerHTML = `
+            <img src="/minecraft-icon-13.png" class="icon-svg" alt="Minecraft">
+            <span>${appName}</span>
+        `;
+    } else if (appName === 'COD Zombies: Portable') {
+        appIcon.innerHTML = `
+            <img src="/Screenshot_2025-04-04_202904-removebg-preview.png" class="icon-svg" alt="COD Zombies: Portable">
+            <span>${appName}</span>
+        `;
+    } else if (appName === 'Five Nights at Freddy\'s') {
+        appIcon.innerHTML = `
+            <img src="/fnaf_1_logo_by_esoteriques_df2b7us-fullview-2719929492.jpg" class="icon-svg" alt="Five Nights at Freddy's">
+            <span>${appName}</span>
+        `;
+    } else if (appName === 'GameHub') {
+        appIcon.innerHTML = `
+            <svg viewBox="0 0 24 24" class="icon-svg">
+                <path d="M21,6H3C1.9,6 1,6.9 1,8V16C1,17.1 1.9,18 3,18H21C22.1,18 23,17.1 23,16V8C23,6.9 22.1,6 21,6M21,16H3V8H21V16M6,15H8V13H10V11H8V9H6V11H4V13H6V15M14.5,12A1.5,1.5 0 0,1 16,13.5A1.5,1.5 0 0,1 14.5,15A1.5,1.5 0 0,1 13,13.5A1.5,1.5 0 0,1 14.5,12M18.5,9A1.5,1.5 0 0,1 20,10.5A1.5,1.5 0 0,1 18.5,12A1.5,1.5 0 0,1 17,10.5A1.5,1.5 0 0,1 18.5,9Z" fill="#4CAF50"/>
+            </svg>
+            <span>${appName}</span>
+        `;
+    } else {
+        appIcon.innerHTML = `
+            <svg viewBox="0 0 24 24" class="icon-svg">
+                ${svgPath}
+            </svg>
+            <span>${appName}</span>
+        `;
+    }
+    
+    desktopIcons.appendChild(appIcon);
+    
+    // Add double-click event listener
+    appIcon.addEventListener('dblclick', () => {
+        openApp(appName);
+    });
+    
+    // Make desktop icons sortable again to include the new icon
+    initSortable();
+    
+    // Save the updated apps list
+    saveInstalledApps();
+}
+
+// Add new function to check if an app is already installed
+function isAppInstalled(appName) {
+    const desktopIcons = document.querySelector('.desktop-icons');
     const existingApp = Array.from(desktopIcons.querySelectorAll('.icon')).find(
         icon => icon.getAttribute('data-name') === appName
     );
+    return !!existingApp;
+}
+
+// Modify the restoreInstalledApps function to check for duplicates
+function restoreInstalledApps() {
+    const savedApps = JSON.parse(localStorage.getItem('installedApps') || '[]');
+    const desktopIcons = document.querySelector('.desktop-icons');
     
-    if (!existingApp) {
-        const appIcon = document.createElement('div');
-        appIcon.className = 'icon';
-        appIcon.setAttribute('data-name', appName);
-        
-        if (appName === 'Minecraft') {
-            appIcon.innerHTML = `
-                <img src="/minecraft-icon-13.png" class="icon-svg" alt="Minecraft">
-                <span>${appName}</span>
-            `;
-        } else if (appName === 'COD Zombies: Portable') {
-            appIcon.innerHTML = `
-                <img src="/Screenshot_2025-04-04_202904-removebg-preview.png" class="icon-svg" alt="COD Zombies: Portable">
-                <span>${appName}</span>
-            `;
-        } else if (appName === 'Five Nights at Freddy\'s') {
-            appIcon.innerHTML = `
-                <img src="/fnaf_1_logo_by_esoteriques_df2b7us-fullview-2719929492.jpg" class="icon-svg" alt="Five Nights at Freddy's">
-                <span>${appName}</span>
-            `;
-        } else {
-            appIcon.innerHTML = `
-                <svg viewBox="0 0 24 24" class="icon-svg">
-                    ${svgPath}
-                </svg>
-                <span>${appName}</span>
-            `;
+    savedApps.forEach(app => {
+        if (!isAppInstalled(app.name)) {  // Only add if not already installed
+            const appIcon = document.createElement('div');
+            appIcon.className = 'icon';
+            appIcon.setAttribute('data-name', app.name);
+            appIcon.innerHTML = app.html;
+            
+            desktopIcons.appendChild(appIcon);
+            
+            // Re-add double-click event listener
+            appIcon.addEventListener('dblclick', () => {
+                openApp(app.name);
+            });
         }
-        
-        desktopIcons.appendChild(appIcon);
-        
-        // Add double-click event listener
-        appIcon.addEventListener('dblclick', () => {
-            openApp(appName);
-        });
-        
-        // Make desktop icons sortable again to include the new icon
-        initSortable();
-        
-        // Save the updated apps list
-        saveInstalledApps();
-    }
+    });
+}
+
+// Function to save installed apps to localStorage
+function saveInstalledApps() {
+    const desktopIcons = document.querySelector('.desktop-icons');
+    const installedApps = Array.from(desktopIcons.querySelectorAll('.icon')).map(icon => {
+        return {
+            name: icon.getAttribute('data-name'),
+            html: icon.innerHTML
+        };
+    }).filter(app => 
+        app.name !== 'Recycle Bin' && 
+        app.name !== 'File Explorer' && 
+        app.name !== 'Edge'
+    );
+    
+    localStorage.setItem('installedApps', JSON.stringify(installedApps));
 }
 
 function initSearch() {
@@ -2292,43 +2374,6 @@ function initFileExplorer() {
                 sidebarItems.forEach(si => si.classList.remove('active'));
                 item.classList.add('active');
             }
-        });
-    });
-}
-
-// Function to save installed apps to localStorage
-function saveInstalledApps() {
-    const desktopIcons = document.querySelector('.desktop-icons');
-    const installedApps = Array.from(desktopIcons.querySelectorAll('.icon')).map(icon => {
-        return {
-            name: icon.getAttribute('data-name'),
-            html: icon.innerHTML
-        };
-    }).filter(app => 
-        app.name !== 'Recycle Bin' && 
-        app.name !== 'File Explorer' && 
-        app.name !== 'Edge'
-    );
-    
-    localStorage.setItem('installedApps', JSON.stringify(installedApps));
-}
-
-// Function to restore installed apps from localStorage
-function restoreInstalledApps() {
-    const savedApps = JSON.parse(localStorage.getItem('installedApps') || '[]');
-    const desktopIcons = document.querySelector('.desktop-icons');
-    
-    savedApps.forEach(app => {
-        const appIcon = document.createElement('div');
-        appIcon.className = 'icon';
-        appIcon.setAttribute('data-name', app.name);
-        appIcon.innerHTML = app.html;
-        
-        desktopIcons.appendChild(appIcon);
-        
-        // Re-add double-click event listener
-        appIcon.addEventListener('dblclick', () => {
-            openApp(app.name);
         });
     });
 }
