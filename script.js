@@ -74,6 +74,14 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
+        // Add Calculator icon event listener
+        const calculatorIcon = document.querySelector('.icon[data-name="Calculator"]');
+        if (calculatorIcon) {
+            calculatorIcon.addEventListener('dblclick', () => {
+                openApp('Calculator');
+            });
+        }
+
         // Initialize Taskbar Icons
         initTaskbarIcons();
 
@@ -463,6 +471,9 @@ function openApp(appName) {
                 break;
             case 'Settings':
                 safeActivateWindow('settingsWindow', '.taskbar-icon svg[d*="3,5H9V11H3V5M5,7V9H7V7H5M11,7H21V9H11V7"]');
+                break;
+            case 'Calculator':
+                safeActivateWindow('calculatorWindow', '.taskbar-icon svg[d*="4,2H20A2,2 0 0,1 22,4V20A2,2"]');
                 break;
             case 'Store':
                 safeActivateWindow('storeWindow', '.taskbar-icon svg[d*="3,5H9V11H3V5M5,7V9H7V7H5M11,7H21V9H11V7"]');
@@ -2377,3 +2388,232 @@ function initFileExplorer() {
         });
     });
 }
+
+function initCalculator() {
+    const calculatorButtons = document.querySelectorAll('.calc-btn');
+    const calcInput = document.getElementById('calcInput');
+    const calcHistory = document.getElementById('calcHistory');
+    
+    let currentInput = '0';
+    let currentOperation = null;
+    let firstOperand = null;
+    let waitingForSecondOperand = false;
+    let calculationPerformed = false;
+    
+    // Process digit input
+    function inputDigit(digit) {
+        if (waitingForSecondOperand) {
+            currentInput = digit;
+            waitingForSecondOperand = false;
+        } else {
+            if (calculationPerformed) {
+                currentInput = digit;
+                calculationPerformed = false;
+                calcHistory.textContent = '';
+            } else {
+                currentInput = currentInput === '0' ? 
+                    digit : currentInput + digit;
+            }
+        }
+    }
+    
+    // Handle decimal point
+    function inputDecimal() {
+        if (waitingForSecondOperand) {
+            currentInput = '0.';
+            waitingForSecondOperand = false;
+            return;
+        }
+        
+        if (calculationPerformed) {
+            currentInput = '0.';
+            calculationPerformed = false;
+            calcHistory.textContent = '';
+            return;
+        }
+        
+        if (!currentInput.includes('.')) {
+            currentInput += '.';
+        }
+    }
+    
+    // Handle operations
+    function handleOperator(operator) {
+        const inputValue = parseFloat(currentInput);
+        
+        if (firstOperand === null) {
+            firstOperand = inputValue;
+        } else if (currentOperation) {
+            const result = performCalculation();
+            currentInput = String(result);
+            firstOperand = result;
+        }
+        
+        waitingForSecondOperand = true;
+        currentOperation = operator;
+        
+        // Update history
+        let symbol;
+        switch(operator) {
+            case 'add': symbol = '+'; break;
+            case 'subtract': symbol = '−'; break;
+            case 'multiply': symbol = '×'; break;
+            case 'divide': symbol = '÷'; break;
+        }
+        calcHistory.textContent = `${firstOperand} ${symbol}`;
+    }
+    
+    // Calculate result
+    function performCalculation() {
+        const inputValue = parseFloat(currentInput);
+        
+        if (isNaN(firstOperand) || isNaN(inputValue)) return 0;
+        
+        let result;
+        switch(currentOperation) {
+            case 'add':
+                result = firstOperand + inputValue;
+                break;
+            case 'subtract':
+                result = firstOperand - inputValue;
+                break;
+            case 'multiply':
+                result = firstOperand * inputValue;
+                break;
+            case 'divide':
+                result = firstOperand / inputValue;
+                break;
+            default:
+                return inputValue;
+        }
+        
+        return Math.round(result * 1000000) / 1000000; // Handle precision issues
+    }
+    
+    // Clear calculator
+    function resetCalculator() {
+        currentInput = '0';
+        currentOperation = null;
+        firstOperand = null;
+        waitingForSecondOperand = false;
+        calcHistory.textContent = '';
+    }
+    
+    // Update display
+    function updateDisplay() {
+        calcInput.textContent = formatNumber(currentInput);
+        
+        // Keep display size reasonable
+        if (currentInput.length > 12) {
+            calcInput.style.fontSize = '24px';
+        } else if (currentInput.length > 8) {
+            calcInput.style.fontSize = '28px';
+        } else {
+            calcInput.style.fontSize = '32px';
+        }
+    }
+    
+    // Format number for display (add commas)
+    function formatNumber(num) {
+        const parts = num.toString().split('.');
+        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        return parts.join('.');
+    }
+    
+    // Calculator event listeners
+    calculatorButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const value = button.getAttribute('data-value');
+            const action = button.getAttribute('data-action');
+            
+            if (value) {
+                if (value === '.') {
+                    inputDecimal();
+                } else {
+                    inputDigit(value);
+                }
+            } else if (action) {
+                switch(action) {
+                    case 'clear':
+                        resetCalculator();
+                        break;
+                    case 'backspace':
+                        currentInput = currentInput.length > 1 ? 
+                            currentInput.slice(0, -1) : '0';
+                        break;
+                    case 'percent':
+                        currentInput = String(parseFloat(currentInput) / 100);
+                        break;
+                    case 'plusMinus':
+                        currentInput = String(-parseFloat(currentInput));
+                        break;
+                    case 'equals':
+                        if (currentOperation && !waitingForSecondOperand) {
+                            calcHistory.textContent += ` ${currentInput} =`;
+                            const result = performCalculation();
+                            currentInput = String(result);
+                            firstOperand = null;
+                            currentOperation = null;
+                            calculationPerformed = true;
+                        }
+                        break;
+                    default:
+                        handleOperator(action);
+                }
+            }
+            
+            updateDisplay();
+        });
+    });
+    
+    // Keyboard support
+    document.addEventListener('keydown', (e) => {
+        if (!document.getElementById('calculatorWindow').classList.contains('active')) {
+            return; // Only process keys when calculator is active
+        }
+        
+        // Prevent default for calculator keys to avoid browser shortcuts
+        if (/[\d+\-*/.=]|Enter|Backspace|Escape|Delete/.test(e.key)) {
+            e.preventDefault();
+        }
+        
+        if (/\d/.test(e.key)) {
+            inputDigit(e.key);
+        } else if (e.key === '.') {
+            inputDecimal();
+        } else if (e.key === '+') {
+            handleOperator('add');
+        } else if (e.key === '-') {
+            handleOperator('subtract');
+        } else if (e.key === '*') {
+            handleOperator('multiply');
+        } else if (e.key === '/') {
+            handleOperator('divide');
+        } else if (e.key === '=' || e.key === 'Enter') {
+            if (currentOperation && !waitingForSecondOperand) {
+                calcHistory.textContent += ` ${currentInput} =`;
+                const result = performCalculation();
+                currentInput = String(result);
+                firstOperand = null;
+                currentOperation = null;
+                calculationPerformed = true;
+            }
+        } else if (e.key === 'Backspace') {
+            currentInput = currentInput.length > 1 ? 
+                currentInput.slice(0, -1) : '0';
+        } else if (e.key === 'Escape' || e.key === 'Delete') {
+            resetCalculator();
+        } else if (e.key === '%') {
+            currentInput = String(parseFloat(currentInput) / 100);
+        }
+        
+        updateDisplay();
+    });
+    
+    // Initial display
+    updateDisplay();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    initCalculator();
+});
