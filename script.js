@@ -286,11 +286,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const volumeIcon = document.getElementById('volumeIcon');
         const volumeSlider = document.getElementById('volumeSlider');
         const volumeSliderInner = document.getElementById('volumeSliderInner');
-        
+
         // Create an audio context and oscillator for sound testing
         let audioContext = null;
         let oscillator = null;
-        
+
         function initAudio() {
             if (audioContext) return;
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -304,19 +304,20 @@ document.addEventListener('DOMContentLoaded', () => {
             oscillator.start();
             oscillator.stop(audioContext.currentTime + 0.1); // Play for 0.1 seconds
         }
-        
+
         volumeIcon.addEventListener('click', () => {
             volumeSlider.classList.toggle('active');
             // Play a short sound when clicking the volume icon
             initAudio();
         });
-        
+
         volumeSlider.addEventListener('click', (e) => {
-            const sliderWidth = volumeSlider.clientWidth;
-            const clickX = e.offsetX;
-            const volume = Math.min(Math.max(clickX / sliderWidth, 0), 1);
-            volumeSliderInner.style.width = `${volume * 100}%`;
-            
+            const sliderRect = volumeSlider.getBoundingClientRect();
+            const height = sliderRect.height - 16; // Account for padding
+            const clickY = e.clientY - sliderRect.top - 8; // Account for top padding
+            const volume = Math.min(Math.max(1 - (clickY / height), 0), 1);
+            volumeSliderInner.style.height = `${volume * 100}%`;
+
             // Play a test sound at the selected volume
             initAudio();
             if (audioContext) {
@@ -329,7 +330,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 oscillator.start();
                 oscillator.stop(audioContext.currentTime + 0.1);
             }
-            
+
             // Update volume icon based on level
             const volumeIconPath = volumeIcon.querySelector('svg path');
             if (volumeIconPath) {
@@ -342,28 +343,92 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         });
-        
+
+        let isDragging = false;
+
+        volumeSlider.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            updateVolume(e);
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                updateVolume(e);
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+
+        function updateVolume(e) {
+            const sliderRect = volumeSlider.getBoundingClientRect();
+            const height = sliderRect.height - 16;
+            const clickY = e.clientY - sliderRect.top - 8;
+            const volume = Math.min(Math.max(1 - (clickY / height), 0), 1);
+            volumeSliderInner.style.height = `${volume * 100}%`;
+
+            // Update volume icon based on level
+            const volumeIconPath = volumeIcon.querySelector('svg path');
+            if (volumeIconPath) {
+                if (volume < 0.3) {
+                    volumeIconPath.setAttribute('d', 'M7,9V15H11L16,20V4L11,9H7Z');
+                } else if (volume < 0.7) {
+                    volumeIconPath.setAttribute('d', 'M5,9V15H9L14,20V4L9,9H5M18.5,12C18.5,10.23 17.5,8.71 16,7.97V16C17.5,15.29 18.5,13.76 18.5,12Z');
+                } else {
+                    volumeIconPath.setAttribute('d', 'M14,3.23V5.29C16.89,6.15 19,8.83 19,12C19,15.17 16.89,17.84 14,18.7V20.77C18,19.86 21,16.28 21,12C21,7.72 18,4.14 14,3.23M16.5,12C16.5,10.23 15.5,8.71 14,7.97V16C15.5,15.29 16.5,13.76 16.5,12M3,9V15H7L12,20V4L7,9H3Z');
+                }
+            }
+        }
+
         // Hide volume slider when clicking elsewhere
         document.addEventListener('click', (e) => {
             if (!volumeIcon.contains(e.target) && !volumeSlider.contains(e.target)) {
                 volumeSlider.classList.remove('active');
             }
         });
+
+        // Initialize WiFi icon
+        const wifiIcon = document.querySelector('.wifi-icon');
+        if (wifiIcon) {
+            wifiIcon.addEventListener('click', () => {
+                const notification = document.createElement('div');
+                notification.classList.add('wifi-notification');
+                notification.innerHTML = `
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12,21L15.6,16.2C14.6,15.45 13.35,15 12,15C10.65,15 9.4,15.45 8.4,16.2L12,21M12,3C7.95,3 4.21,4.34 1.2,6.6L3,9C5.5,7.12 8.62,6 12,6C15.38,6 18.5,7.12 21,9L22.8,6.6C19.79,4.34 16.05,3 12,3M12,9C9.3,9 6.81,9.89 4.8,11.4L6.6,13.8C8.1,12.67 9.97,12 12,12C14.03,12 15.9,12.67 17.4,13.8L19.2,11.4C17.19,9.89 14.7,9 12,9Z"/>
+                    </svg>
+                    <span>Connected to WiFi - Connection is secure</span>
+                `;
+                document.body.appendChild(notification);
+
+                setTimeout(() => {
+                    notification.classList.add('show');
+                }, 10);
+
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                    setTimeout(() => {
+                        document.body.removeChild(notification);
+                    }, 300);
+                }, 3000);
+            });
+        }
     } catch (error) {
         console.error('Initialization error:', error);
         showSystemNotification('An error occurred during page load');
     }
-    
+
     // Apply saved brightness and night light settings
     const savedBrightness = localStorage.getItem('brightness');
     if (savedBrightness) {
         document.documentElement.style.filter = `brightness(${savedBrightness / 100})`;
     }
-    
+
     if (localStorage.getItem('nightLight') === 'on') {
         document.documentElement.style.filter = (document.documentElement.style.filter || '') + ' sepia(30%)';
     }
-    
+
     // Apply language to desktop if setup is already complete
     if (localStorage.getItem('setupComplete')) {
         applyLanguageToDesktop();
@@ -377,7 +442,7 @@ document.addEventListener('DOMContentLoaded', () => {
             display: flex;
             overflow: hidden;
         }
-        
+
         #gameHubIframe {
             width: 100%;
             height: 100%;
@@ -395,12 +460,12 @@ async function fetchWeatherInfo() {
         // Use a free, simple weather API that doesn't require an API key
         const response = await fetch('https://ipapi.co/json/');
         const locationData = await response.json();
-        
+
         const weatherResponse = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${locationData.latitude}&longitude=${locationData.longitude}&current_weather=true`);
         const weatherData = await weatherResponse.json();
 
         const temperature = Math.round(weatherData.current_weather.temperature);
-        
+
         temperatureEl.textContent = `${temperature}°C`;
         locationEl.textContent = locationData.city || 'Unknown Location';
     } catch (error) {
@@ -414,14 +479,14 @@ function updateClock() {
     const now = new Date();
     const timeElement = document.getElementById('time');
     const dateElement = document.getElementById('date');
-    
+
     timeElement.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     dateElement.textContent = now.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
-    
+
     // Update login screen time too
     const loginTimeEl = document.getElementById('loginTime');
     const loginDateEl = document.getElementById('loginDate');
-    
+
     if (loginTimeEl && loginDateEl) {
         loginTimeEl.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         loginDateEl.textContent = now.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' });
@@ -441,7 +506,7 @@ function openApp(appName) {
             const window = document.getElementById(windowId);
             if (window) {
                 activateWindow(window, taskbarSelector);
-                
+
                 // If it's a game window, ensure iframe is loaded
                 const iframe = window.querySelector('iframe');
                 if (iframe) {
@@ -473,7 +538,7 @@ function openApp(appName) {
                 safeActivateWindow('settingsWindow', '.taskbar-icon svg[d*="3,5H9V11H3V5M5,7V9H7V7H5M11,7H21V9H11V7"]');
                 break;
             case 'Calculator':
-                safeActivateWindow('calculatorWindow', '.taskbar-icon svg[d*="4,2H20A2,2 0 0,1 22,4V20A2,2"]');
+                safeActivateWindow('calculatorWindow', '.taskbar-icon img[alt="Calculator"]');
                 break;
             case 'Store':
                 safeActivateWindow('storeWindow', '.taskbar-icon svg[d*="3,5H9V11H3V5M5,7V9H7V7H5M11,7H21V9H11V7"]');
@@ -538,11 +603,11 @@ function activateWindow(windowElement, taskbarIconSelector) {
 
 function initTaskbarIcons() {
     const taskbarIcons = document.querySelectorAll('.taskbar-icon');
-    
+
     taskbarIcons.forEach(icon => {
         icon.addEventListener('click', () => {
             const svgPath = icon.querySelector('svg path').getAttribute('d');
-            
+
             // File Explorer
             if (svgPath.includes('20,18H4V8H20')) {
                 toggleWindow('fileExplorer', icon);
@@ -559,7 +624,7 @@ function initTaskbarIcons() {
 
 function toggleWindow(windowId, taskbarIcon) {
     const window = document.getElementById(windowId);
-    
+
     if (windowId === 'edgeWindow') {
         const edgeIframe = document.getElementById('edgeIframe');
         edgeIframe.src = 'https://swiftgaurd-com.pages.dev/'; 
@@ -572,15 +637,15 @@ function toggleWindow(windowId, taskbarIcon) {
         // First deactivate all windows
         const activeWindows = document.querySelectorAll('.window.active');
         activeWindows.forEach(win => win.classList.remove('active'));
-        
+
         // Deactivate all taskbar icons
         const taskbarIcons = document.querySelectorAll('.taskbar-icon');
         taskbarIcons.forEach(icon => icon.classList.remove('active'));
-        
+
         // Activate this window and its icon
         window.classList.add('active');
         taskbarIcon.classList.add('active');
-        
+
         // Position the window
         window.style.left = '100px';
         window.style.top = '50px';
@@ -592,18 +657,18 @@ function initPowerMenu() {
     const powerMenu = document.getElementById('powerMenu');
     const powerOff = document.getElementById('powerOff');
     const restart = document.getElementById('restart');
-    
+
     powerButton.addEventListener('click', (e) => {
         e.stopPropagation();
         powerMenu.classList.toggle('active');
     });
-    
+
     document.addEventListener('click', (e) => {
         if (!powerMenu.contains(e.target) && !powerButton.contains(e.target)) {
             powerMenu.classList.remove('active');
         }
     });
-    
+
     powerOff.addEventListener('click', () => {
         showSystemNotification('Shutting down...');
         setTimeout(() => {
@@ -611,7 +676,7 @@ function initPowerMenu() {
             document.body.style.transition = 'opacity 2s';
         }, 1000);
     });
-    
+
     restart.addEventListener('click', () => {
         showSystemNotification('Restarting...');
         setTimeout(() => {
@@ -631,11 +696,11 @@ function showSystemNotification(message) {
         notification.classList.add('system-notification');
         notification.textContent = message;
         document.body.appendChild(notification);
-        
+
         // Use requestAnimationFrame to ensure proper DOM insertion
         requestAnimationFrame(() => {
             notification.classList.add('show');
-            
+
             // Ensure removal even if something goes wrong
             setTimeout(() => {
                 try {
@@ -657,36 +722,36 @@ function showSystemNotification(message) {
 
 function makeWindowsDraggable() {
     const windows = document.querySelectorAll('.window');
-    
+
     windows.forEach(win => {
         const header = win.querySelector('.window-header');
-        
+
         let isDragging = false;
         let offsetX, offsetY;
-        
+
         header.addEventListener('mousedown', (e) => {
             isDragging = true;
             offsetX = e.clientX - win.getBoundingClientRect().left;
             offsetY = e.clientY - win.getBoundingClientRect().top;
-            
+
             // Bring the window to front
             windows.forEach(w => {
                 w.style.zIndex = "10";
             });
             win.style.zIndex = "20";
         });
-        
+
         document.addEventListener('mousemove', (e) => {
             if (!isDragging) return;
-            
+
             win.style.left = `${e.clientX - offsetX}px`;
             win.style.top = `${e.clientY - offsetY}px`;
         });
-        
+
         document.addEventListener('mouseup', () => {
             isDragging = false;
         });
-        
+
         // Add resize functionality
         makeWindowResizable(win);
     });
@@ -696,36 +761,36 @@ function makeWindowsDraggable() {
 function makeWindowResizable(windowElement) {
     const minWidth = 400;
     const minHeight = 300;
-    
+
     // Create resize handles
     const positions = ['n', 'e', 's', 'w', 'ne', 'se', 'sw', 'nw'];
-    
+
     positions.forEach(pos => {
         const handle = document.createElement('div');
         handle.className = `resize-handle resize-${pos}`;
         windowElement.appendChild(handle);
-        
+
         let startX, startY, startWidth, startHeight, startLeft, startTop;
-        
+
         const mouseDownHandler = function(e) {
             e.preventDefault();
             e.stopPropagation();
-            
+
             startX = e.clientX;
             startY = e.clientY;
             startWidth = parseInt(document.defaultView.getComputedStyle(windowElement).width, 10);
             startHeight = parseInt(document.defaultView.getComputedStyle(windowElement).height, 10);
             startLeft = parseInt(document.defaultView.getComputedStyle(windowElement).left, 10);
             startTop = parseInt(document.defaultView.getComputedStyle(windowElement).top, 10);
-            
+
             document.addEventListener('mousemove', mouseMoveHandler);
             document.addEventListener('mouseup', mouseUpHandler);
         };
-        
+
         const mouseMoveHandler = function(e) {
             const dx = e.clientX - startX;
             const dy = e.clientY - startY;
-            
+
             // Resize based on the handle position
             if (pos.includes('e')) {
                 const newWidth = startWidth + dx;
@@ -754,39 +819,39 @@ function makeWindowResizable(windowElement) {
                 }
             }
         };
-        
+
         const mouseUpHandler = function() {
             document.removeEventListener('mousemove', mouseMoveHandler);
             document.removeEventListener('mouseup', mouseUpHandler);
         };
-        
+
         handle.addEventListener('mousedown', mouseDownHandler);
     });
 }
 
 function initializeWindowControls() {
     const windows = document.querySelectorAll('.window');
-    
+
     windows.forEach(win => {
         const minimizeBtn = win.querySelector('.minimize');
         const maximizeBtn = win.querySelector('.maximize');
         const closeBtn = win.querySelector('.close');
-        
+
         closeBtn.addEventListener('click', () => {
             win.classList.remove('active');
-            
+
             // Specific handling for game windows to stop sounds
             if (win.id === 'minecraftWindow' || 
                 win.id === 'codZombiesWindow' || 
                 win.id === 'fnafWindow') {
-                
+
                 // Reset iframe source to stop sounds and interactions
                 const iframe = win.querySelector('iframe');
                 if (iframe) {
                     iframe.src = 'about:blank';
                 }
             }
-            
+
             // Deactivate the corresponding taskbar icon
             if (win.id === 'fileExplorer') {
                 const taskbarIcons = document.querySelectorAll('.taskbar-icon');
@@ -797,11 +862,11 @@ function initializeWindowControls() {
                 });
             }
         });
-        
+
         minimizeBtn.addEventListener('click', () => {
             win.classList.remove('active');
         });
-        
+
         maximizeBtn.addEventListener('click', () => {
             if (win.style.width === '100vw') {
                 win.style.width = '800px';
@@ -828,7 +893,7 @@ function initSortable() {
         animation: 150,
         ghostClass: 'sortable-ghost'
     });
-    
+
     // Make taskbar icons sortable
     new Sortable(document.getElementById('taskbarIcons'), {
         animation: 150,
@@ -847,7 +912,7 @@ function initDeviceSettings() {
             localStorage.setItem('brightness', brightness);
             showSystemNotification(`Brightness: ${brightness}%`);
         });
-        
+
         // Load saved brightness
         const savedBrightness = localStorage.getItem('brightness');
         if (savedBrightness) {
@@ -870,7 +935,7 @@ function initDeviceSettings() {
                 showSystemNotification('Night light: Off');
             }
         });
-        
+
         // Load saved night light setting
         if (localStorage.getItem('nightLight') === 'on') {
             nightLightToggle.checked = true;
@@ -885,7 +950,7 @@ function initDeviceSettings() {
         volumeSlider.addEventListener('input', (e) => {
             const volume = e.target.value;
             localStorage.setItem('volume', volume);
-            
+
             // Update volume icon
             const volumeIcon = document.querySelector('.volume-icon svg path');
             if (volumeIcon) {
@@ -897,10 +962,10 @@ function initDeviceSettings() {
                     volumeIcon.setAttribute('d', 'M14,3.23V5.29C16.89,6.15 19,8.83 19,12C19,15.17 16.89,17.84 14,18.7V20.77C18,19.86 21,16.28 21,12C21,7.72 18,4.14 14,3.23M16.5,12C16.5,10.23 15.5,8.71 14,7.97V16C15.5,15.29 16.5,13.76 16.5,12M3,9V15H7L12,20V4L7,9H3Z');
                 }
             }
-            
+
             showSystemNotification(`Volume: ${volume}%`);
         });
-        
+
         // Load saved volume
         const savedVolume = localStorage.getItem('volume');
         if (savedVolume) {
@@ -927,7 +992,7 @@ function initDeviceSettings() {
             localStorage.setItem('soundScheme', selectedScheme);
             showSystemNotification(`Sound scheme changed to: ${selectedScheme}`);
         });
-        
+
         // Load saved sound scheme
         const savedSoundScheme = localStorage.getItem('soundScheme');
         if (savedSoundScheme) {
@@ -941,7 +1006,7 @@ function initDeviceSettings() {
         powerModeSelect.addEventListener('change', (e) => {
             const selectedMode = e.target.value;
             localStorage.setItem('powerMode', selectedMode);
-            
+
             if (selectedMode === 'Battery saver') {
                 document.documentElement.style.filter = document.documentElement.style.filter + ' brightness(0.8)';
                 showSystemNotification('Power mode: Battery saver');
@@ -955,7 +1020,7 @@ function initDeviceSettings() {
                 showSystemNotification('Power mode: Balanced');
             }
         });
-        
+
         // Load saved power mode
         const savedPowerMode = localStorage.getItem('powerMode');
         if (savedPowerMode) {
@@ -988,22 +1053,22 @@ function initUserMenu() {
     const loginPassword = document.getElementById('loginPassword');
     const loginAccessibility = document.querySelector('.login-option:first-child');
     const loginPower = document.querySelector('.login-option:last-child');
-    
+
     userProfile.addEventListener('click', (e) => {
         e.stopPropagation();
         userMenu.classList.toggle('active');
     });
-    
+
     document.addEventListener('click', (e) => {
         if (!userMenu.contains(e.target) && !userProfile.contains(e.target)) {
             userMenu.classList.remove('active');
         }
     });
-    
+
     lockAccount.addEventListener('click', () => {
         showLoginScreen();
     });
-    
+
     signOut.addEventListener('click', () => {
         showConfirmDialog("Are you sure? You can't undo this.", () => {
             // Show loading animation
@@ -1013,7 +1078,7 @@ function initUserMenu() {
                 <div class="loading-spinner"></div>
             `;
             document.body.appendChild(loadingOverlay);
-            
+
             // Clear local storage and show setup wizard
             setTimeout(() => {
                 localStorage.removeItem('setupComplete');
@@ -1022,7 +1087,7 @@ function initUserMenu() {
             }, 2000);
         });
     });
-    
+
     const userPin = localStorage.getItem('userPin');
     if (userPin) {
         loginPassword.addEventListener('keyup', (e) => {
@@ -1044,19 +1109,19 @@ function initUserMenu() {
             }
         });
     }
-    
+
     // Update login screen time
     function updateLoginClock() {
         const now = new Date();
         const loginTimeEl = document.getElementById('loginTime');
         const loginDateEl = document.getElementById('loginDate');
-        
+
         if (loginTimeEl && loginDateEl) {
             loginTimeEl.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             loginDateEl.textContent = now.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' });
         }
     }
-    
+
     function showLoginScreen() {
         updateLoginClock();
         const startMenu = document.getElementById('startMenu');
@@ -1067,23 +1132,23 @@ function initUserMenu() {
             loginPassword.focus();
         }, 500);
     }
-    
+
     function hideLoginScreen() {
         loginScreen.classList.remove('active');
         loginPassword.value = '';
     }
-    
+
     // Initialize login screen time
     updateLoginClock();
     setInterval(updateLoginClock, 60000);
-    
+
     // Initialize login accessibility option
     if (loginAccessibility) {
         loginAccessibility.addEventListener('click', () => {
             showAccessibilityMenu();
         });
     }
-    
+
     // Initialize login power option
     if (loginPower) {
         loginPower.addEventListener('click', () => {
@@ -1095,7 +1160,7 @@ function initUserMenu() {
 function showAccessibilityMenu() {
     // Remove any existing menu
     removeExistingLoginMenus();
-    
+
     const menu = document.createElement('div');
     menu.className = 'login-popup-menu accessibility-menu';
     menu.innerHTML = `
@@ -1128,21 +1193,21 @@ function showAccessibilityMenu() {
             </label>
         </div>
     `;
-    
+
     document.body.appendChild(menu);
-    
+
     // Position the menu
     const accessibilityButton = document.querySelector('.login-option:first-child');
     const rect = accessibilityButton.getBoundingClientRect();
     menu.style.left = `${rect.left}px`;
     menu.style.top = `${rect.top - menu.offsetHeight - 10}px`;
-    
+
     // Add toggle functionality
     menu.querySelectorAll('.login-toggle input').forEach(toggle => {
         toggle.addEventListener('change', (e) => {
             const feature = e.target.closest('.login-popup-item').querySelector('span').textContent;
             showSystemNotification(`${feature}: ${e.target.checked ? 'On' : 'Off'}`);
-            
+
             if (feature === 'High Contrast' && e.target.checked) {
                 document.body.classList.add('high-contrast');
             } else if (feature === 'High Contrast' && !e.target.checked) {
@@ -1150,7 +1215,7 @@ function showAccessibilityMenu() {
             }
         });
     });
-    
+
     // Close menu when clicking outside
     document.addEventListener('click', closeLoginMenus);
 }
@@ -1158,13 +1223,13 @@ function showAccessibilityMenu() {
 function showLoginPowerMenu() {
     // Remove any existing menu
     removeExistingLoginMenus();
-    
+
     const menu = document.createElement('div');
     menu.className = 'login-popup-menu power-menu';
     menu.innerHTML = `
         <div class="login-popup-item" id="loginShutdown">
             <svg viewBox="0 0 24 24">
-                <path d="M13,3H11V13H13V3M17.83,5.17L16.41,6.59C17.99,7.86 19,9.81 19,12C19,15.87 15.87,19 12,19C8.13,19 5,15.87 5,12C5,9.81 6.01,7.86 7.58,6.58L6.17,5.17C4.23,6.82 3,9.26 3,12C3,16.97 7.03,21 12,21C16.97,21 21,16.97 21,12C21,9.26 19.77,6.82 17.83,5.17Z" fill="currentColor"/>
+                <path d="M13,3H11V13H13V3M17.83,5.17L16.41,6.59C17.99,7.86 19,9.81 19,12C19,15.17 16.89,17.84 14,18.7V20.77C18,19.86 21,16.28 21,12C21,7.72 18,4.14 14,3.23M16.5,12C16.5,10.23 15.5,8.71 14,7.97V16C15.5,15.29 16.5,13.76 16.5,12M3,9V15H7L12,20V4L7,9H3Z" fill="currentColor"/>
             </svg>
             <span>Shut down</span>
         </div>
@@ -1181,15 +1246,15 @@ function showLoginPowerMenu() {
             <span>Sleep</span>
         </div>
     `;
-    
+
     document.body.appendChild(menu);
-    
+
     // Position the menu
     const powerButton = document.querySelector('.login-option:last-child');
     const rect = powerButton.getBoundingClientRect();
     menu.style.left = `${rect.left}px`;
     menu.style.top = `${rect.top - menu.offsetHeight - 10}px`;
-    
+
     // Add click handlers
     document.getElementById('loginShutdown').addEventListener('click', () => {
         showSystemNotification('Shutting down...');
@@ -1199,7 +1264,7 @@ function showLoginPowerMenu() {
         }, 1000);
         closeLoginMenus();
     });
-    
+
     document.getElementById('loginRestart').addEventListener('click', () => {
         showSystemNotification('Restarting...');
         setTimeout(() => {
@@ -1212,19 +1277,19 @@ function showLoginPowerMenu() {
         }, 1000);
         closeLoginMenus();
     });
-    
+
     document.getElementById('loginSleep').addEventListener('click', () => {
         showSystemNotification('Entering sleep mode...');
-        
+
         // Create sleep overlay
         const sleepOverlay = document.createElement('div');
         sleepOverlay.className = 'sleep-overlay';
         document.body.appendChild(sleepOverlay);
-        
+
         // Fade in the overlay
         setTimeout(() => {
             sleepOverlay.style.opacity = '1';
-            
+
             // Add click handler to wake from sleep
             sleepOverlay.addEventListener('click', () => {
                 sleepOverlay.style.opacity = '0';
@@ -1234,10 +1299,10 @@ function showLoginPowerMenu() {
                 }, 500);
             });
         }, 100);
-        
+
         closeLoginMenus();
     });
-    
+
     // Close menu when clicking outside
     document.addEventListener('click', closeLoginMenus);
 }
@@ -1250,21 +1315,21 @@ function removeExistingLoginMenus() {
 function closeLoginMenus(e) {
     const menus = document.querySelectorAll('.login-popup-menu');
     const loginOptions = document.querySelectorAll('.login-option');
-    
+
     let clickedOnMenu = false;
     menus.forEach(menu => {
         if (menu.contains(e?.target)) {
             clickedOnMenu = true;
         }
     });
-    
+
     let clickedOnOption = false;
     loginOptions.forEach(option => {
         if (option.contains(e?.target)) {
             clickedOnOption = true;
         }
     });
-    
+
     if (!clickedOnMenu && !clickedOnOption) {
         removeExistingLoginMenus();
         document.removeEventListener('click', closeLoginMenus);
@@ -1273,13 +1338,13 @@ function closeLoginMenus(e) {
 
 function addAppToDesktop(appName, svgPath) {
     if (isAppInstalled(appName)) return; // Don't add if already exists
-    
+
     const desktopIcons = document.querySelector('.desktop-icons');
-    
+
     const appIcon = document.createElement('div');
     appIcon.className = 'icon';
     appIcon.setAttribute('data-name', appName);
-    
+
     if (appName === 'Minecraft') {
         appIcon.innerHTML = `
             <img src="/minecraft-icon-13.png" class="icon-svg" alt="Minecraft">
@@ -1310,17 +1375,17 @@ function addAppToDesktop(appName, svgPath) {
             <span>${appName}</span>
         `;
     }
-    
+
     desktopIcons.appendChild(appIcon);
-    
+
     // Add double-click event listener
     appIcon.addEventListener('dblclick', () => {
         openApp(appName);
     });
-    
+
     // Make desktop icons sortable again to include the new icon
     initSortable();
-    
+
     // Save the updated apps list
     saveInstalledApps();
 }
@@ -1338,16 +1403,16 @@ function isAppInstalled(appName) {
 function restoreInstalledApps() {
     const savedApps = JSON.parse(localStorage.getItem('installedApps') || '[]');
     const desktopIcons = document.querySelector('.desktop-icons');
-    
+
     savedApps.forEach(app => {
         if (!isAppInstalled(app.name)) {  // Only add if not already installed
             const appIcon = document.createElement('div');
             appIcon.className = 'icon';
             appIcon.setAttribute('data-name', app.name);
             appIcon.innerHTML = app.html;
-            
+
             desktopIcons.appendChild(appIcon);
-            
+
             // Re-add double-click event listener
             appIcon.addEventListener('dblclick', () => {
                 openApp(app.name);
@@ -1369,14 +1434,14 @@ function saveInstalledApps() {
         app.name !== 'File Explorer' && 
         app.name !== 'Edge'
     );
-    
+
     localStorage.setItem('installedApps', JSON.stringify(installedApps));
 }
 
 function initSearch() {
     const searchInput = document.getElementById('searchInput');
     const searchResults = document.getElementById('searchResults');
-    
+
     // List of apps for search
     const apps = [
         { name: 'File Explorer', icon: '<path d="M20,18H4V8H20M20,6H12L10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6Z" fill="#FFB900"/>' },
@@ -1388,31 +1453,31 @@ function initSearch() {
         { name: 'COD Zombies: Portable', icon: '<path d="M21,5C19.89,4.65 18.67,4.5 17.5,4.5C15.55,4.5 13.45,4.9 12,6C10.55,4.9 8.45,4.5 6.5,4.5C4.55,4.5 2.45,4.9 1,6V20.65C1,20.9 1.25,21.15 1.5,21.15C1.6,21.15 1.65,21.1 1.75,21.1C3.1,20.45 5.05,20 6.5,20C8.45,20 10.55,20.4 12,21.5C13.35,20.65 15.8,20 17.5,20C19.15,20 20.85,20.3 22.25,21.05C22.35,21.1 22.4,21.1 22.5,21.1C22.75,21.1 23,20.85 23,20.6V6C22.4,5.55 21.75,5.25 21,5M21,18.5C19.9,18.15 18.7,18 17.5,18C15.8,18 13.35,18.65 12,19.5V8C13.35,7.15 15.8,6.5 17.5,6.5C18.7,6.5 19.9,6.65 21,7V18.5Z" fill="#aa3333"/>' },
         { name: 'Five Nights at Freddy\'s', icon: '<path d="M12,3C7.58,3 4,4.79 4,7V17C4,19.21 7.59,21 12,21C16.41,21 20,19.21 20,17V7C20,4.79 16.42,3 12,3M12,5C16.08,5 18,6.37 18,7C18,7.63 16.08,9 12,9C7.92,9 6,7.63 6,7C6,6.37 7.92,5 12,5M6,9.12C7.47,9.67 9.61,10 12,10C14.39,10 16.53,9.67 18,9.12V12.41C17.38,12.18 16.64,12 15.85,12C13.18,12 11.87,13.6 10.42,15.36C9.38,16.67 8.88,17 7.65,17C6.09,17 6,15.37 6,15.37V9.12M18,14.09V16C18,16.65 16.17,18 12,18C7.83,18 6,16.65 6,16V15.36C6.64,15.67 7.14,15.91 8.08,15.91C9.89,15.91 10.56,15.28 11.89,13.6C13.16,12 14.23,10 16.15,10C16.83,10 17.45,10.03 18,10.09V14.09Z" fill="#AA0000"/>' }
     ];
-    
+
     searchInput.addEventListener('input', () => {
         const searchTerm = searchInput.value.toLowerCase().trim();
-        
+
         // Clear previous results
         searchResults.innerHTML = '';
-        
+
         if (searchTerm === '') {
             searchResults.classList.remove('show');
             return;
         }
-        
+
         // Filter apps based on search term
         const filteredApps = apps.filter(app => 
             app.name.toLowerCase().includes(searchTerm)
         );
-        
+
         if (filteredApps.length > 0) {
             searchResults.classList.add('show');
-            
+
             // Create result items
             filteredApps.forEach(app => {
                 const resultItem = document.createElement('div');
                 resultItem.className = 'search-result-item';
-                
+
                 if (app.isImage) {
                     if (app.name === 'Edge') {
                         resultItem.innerHTML = `
@@ -1431,28 +1496,28 @@ function initSearch() {
                         <span>${app.name}</span>
                     `;
                 }
-                
+
                 // Add click event to open the app
                 resultItem.addEventListener('click', () => {
                     openApp(app.name);
                     searchInput.value = '';
                     searchResults.classList.remove('show');
                 });
-                
+
                 searchResults.appendChild(resultItem);
             });
         } else {
             searchResults.classList.remove('show');
         }
     });
-    
+
     // Hide search results when clicking outside
     document.addEventListener('click', (e) => {
         if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
             searchResults.classList.remove('show');
         }
     });
-    
+
     // Hide search results when pressing Escape
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
@@ -1532,16 +1597,16 @@ function initDesktopSelection() {
 function initContextMenu() {
     const desktop = document.querySelector('.desktop');
     let contextMenu = null;
-    
+
     // Create context menu element
     function createContextMenu() {
         if (document.querySelector('.context-menu')) {
             document.querySelector('.context-menu').remove();
         }
-        
+
         const menu = document.createElement('div');
         menu.className = 'context-menu';
-        
+
         menu.innerHTML = `
             <div class="context-menu-item" id="refreshMenuItem">
                 <svg viewBox="0 0 24 24">
@@ -1570,15 +1635,15 @@ function initContextMenu() {
                 <span>Personalize</span>
             </div>
         `;
-        
+
         document.body.appendChild(menu);
         contextMenu = menu;
-        
+
         // Add event listeners to menu items
         document.getElementById('refreshMenuItem').addEventListener('click', () => {
             showSystemNotification('Refreshing desktop...');
             hideContextMenu();
-            
+
             // Show loading animation
             const loadingOverlay = document.createElement('div');
             loadingOverlay.className = 'loading-overlay';
@@ -1586,18 +1651,18 @@ function initContextMenu() {
                 <div class="loading-spinner"></div>
             `;
             document.body.appendChild(loadingOverlay);
-            
+
             // Simulate refresh action
             setTimeout(() => {
                 loadingOverlay.remove();
                 showSystemNotification('Desktop refreshed');
             }, 1500);
         });
-        
+
         document.getElementById('newMenuItem').addEventListener('click', () => {
             showSystemNotification('Creating new desktop...');
             hideContextMenu();
-            
+
             // Show loading animation
             const loadingOverlay = document.createElement('div');
             loadingOverlay.className = 'loading-overlay';
@@ -1605,83 +1670,83 @@ function initContextMenu() {
                 <div class="loading-spinner"></div>
             `;
             document.body.appendChild(loadingOverlay);
-            
+
             // Simulate creating a new desktop
             setTimeout(() => {
                 loadingOverlay.remove();
-                
+
                 // Clear desktop of all installed apps
                 const desktopIcons = document.querySelector('.desktop-icons');
                 const installedApps = desktopIcons.querySelectorAll('.icon:not([data-name="Recycle Bin"]):not([data-name="File Explorer"]):not([data-name="Edge"])');
                 installedApps.forEach(app => {
                     app.remove();
                 });
-                
+
                 showSystemNotification('New desktop created');
             }, 2000);
         });
-        
+
         document.getElementById('displaySettingsMenuItem').addEventListener('click', () => {
             openApp('Settings');
             hideContextMenu();
         });
-        
+
         document.getElementById('personalizeMenuItem').addEventListener('click', () => {
             openPersonalizationPanel();
             hideContextMenu();
         });
     }
-    
+
     function showContextMenu(x, y) {
         if (!contextMenu) {
             createContextMenu();
         }
-        
+
         // Position the menu
         contextMenu.style.left = `${x}px`;
         contextMenu.style.top = `${y}px`;
-        
+
         // Make sure the menu doesn't go off-screen
         const menuRect = contextMenu.getBoundingClientRect();
         const windowWidth = window.innerWidth;
         const windowHeight = window.innerHeight;
-        
+
         if (menuRect.right > windowWidth) {
             contextMenu.style.left = `${windowWidth - menuRect.width}px`;
         }
-        
+
         if (menuRect.bottom > windowHeight) {
             contextMenu.style.top = `${windowHeight - menuRect.height}px`;
         }
-        
+
         // Show the menu
         contextMenu.classList.add('active');
     }
-    
+
     function hideContextMenu() {
         if (contextMenu) {
             contextMenu.classList.remove('active');
         }
     }
-    
+
     // Show context menu on right-click
     desktop.addEventListener('contextmenu', (e) => {
         e.preventDefault();
         showContextMenu(e.clientX, e.clientY);
     });
-    
+
     // Also add context menu for desktop icons
     const desktopIcons = document.querySelector('.desktop-icons');
     desktopIcons.addEventListener('contextmenu', (e) => {
         e.preventDefault();
         showContextMenu(e.clientX, e.clientY);
     });
-    
+
     // Hide context menu when clicking elsewhere
     document.addEventListener('click', () => {
         hideContextMenu();
     });
-    
+
     // Hide context menu when pressing Escape
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
@@ -1696,10 +1761,10 @@ function openPersonalizationPanel() {
     if (document.querySelector('.personalize-panel')) {
         document.querySelector('.personalize-panel').remove();
     }
-    
+
     const panel = document.createElement('div');
     panel.className = 'personalize-panel';
-    
+
     panel.innerHTML = `
         <div class="personalize-header">
             <h2>Personalize</h2>
@@ -1767,14 +1832,14 @@ function openPersonalizationPanel() {
             </div>
         </div>
     `;
-    
+
     document.body.appendChild(panel);
-    
+
     // Close button event
     panel.querySelector('.close-button').addEventListener('click', () => {
         panel.remove();
     });
-    
+
     // Background selection
     panel.querySelectorAll('.background-option').forEach(option => {
         option.addEventListener('click', () => {
@@ -1782,58 +1847,58 @@ function openPersonalizationPanel() {
             document.querySelector('.desktop').style.backgroundImage = `url('${bgUrl}')`;
             document.querySelector('.login-background').style.backgroundImage = `url('${bgUrl}')`;
             localStorage.setItem('desktop-background', bgUrl);
-            
+
             // Highlight selected option
             panel.querySelectorAll('.background-option').forEach(opt => opt.classList.remove('selected'));
             option.classList.add('selected');
-            
+
             showSystemNotification('Background changed');
         });
     });
-    
+
     // Cursor selection
     panel.querySelectorAll('.cursor-option').forEach(option => {
         option.addEventListener('click', () => {
             const cursorType = option.getAttribute('data-cursor');
             document.body.style.cursor = cursorType;
             localStorage.setItem('cursor-style', cursorType);
-            
+
             // Highlight selected option
             panel.querySelectorAll('.cursor-option').forEach(opt => opt.classList.remove('selected'));
             option.classList.add('selected');
-            
+
             showSystemNotification('Mouse cursor changed');
         });
     });
-    
+
     // UI Theme selection
     panel.querySelectorAll('.theme-option').forEach(option => {
         option.addEventListener('click', () => {
             const theme = option.getAttribute('data-theme');
             applyTheme(theme);
             localStorage.setItem('ui-theme', theme);
-            
+
             // Highlight selected option
             panel.querySelectorAll('.theme-option').forEach(opt => opt.classList.remove('selected'));
             option.classList.add('selected');
-            
+
             showSystemNotification('UI Theme changed');
         });
     });
-    
+
     // Set current selections as active
     const currentBg = localStorage.getItem('desktop-background');
     if (currentBg) {
         const bgOption = panel.querySelector(`.background-option[data-bg="${currentBg}"]`);
         if (bgOption) bgOption.classList.add('selected');
     }
-    
+
     const currentCursor = localStorage.getItem('cursor-style');
     if (currentCursor) {
         const cursorOption = panel.querySelector(`.cursor-option[data-cursor="${currentCursor}"]`);
         if (cursorOption) cursorOption.classList.add('selected');
     }
-    
+
     const currentTheme = localStorage.getItem('ui-theme');
     if (currentTheme) {
         const themeOption = panel.querySelector(`.theme-option[data-theme="${currentTheme}"]`);
@@ -1843,7 +1908,7 @@ function openPersonalizationPanel() {
 
 function applyTheme(theme) {
     const root = document.documentElement;
-    
+
     switch(theme) {
         case 'dark':
             root.style.setProperty('--taskbar-bg', 'rgba(30, 30, 30, 0.85)');
@@ -1899,13 +1964,13 @@ function loadUserPreferences() {
         document.querySelector('.desktop').style.backgroundImage = `url('${savedBg}')`;
         document.querySelector('.login-background').style.backgroundImage = `url('${savedBg}')`;
     }
-    
+
     // Load cursor
     const savedCursor = localStorage.getItem('cursor-style');
     if (savedCursor) {
         document.body.style.cursor = savedCursor;
     }
-    
+
     // Load theme
     const savedTheme = localStorage.getItem('ui-theme');
     if (savedTheme) {
@@ -1925,11 +1990,11 @@ function showConfirmDialog(message, confirmCallback) {
     if (existingDialog) {
         existingDialog.remove();
     }
-    
+
     // Create dialog container
     const dialogContainer = document.createElement('div');
     dialogContainer.className = 'confirm-dialog-container';
-    
+
     // Create dialog
     dialogContainer.innerHTML = `
         <div class="confirm-dialog">
@@ -1940,16 +2005,16 @@ function showConfirmDialog(message, confirmCallback) {
             </div>
         </div>
     `;
-    
+
     // Add to document
     document.body.appendChild(dialogContainer);
-    
+
     // Add event listeners
     dialogContainer.querySelector('.confirm-yes').addEventListener('click', () => {
         dialogContainer.remove();
         if (confirmCallback) confirmCallback();
     });
-    
+
     dialogContainer.querySelector('.confirm-no').addEventListener('click', () => {
         dialogContainer.remove();
     });
@@ -1958,7 +2023,7 @@ function showConfirmDialog(message, confirmCallback) {
 function showSetupWizard() {
     const setupWizard = document.getElementById('setupWizard');
     setupWizard.classList.add('active');
-    
+
     // Initialize setup event listeners
     initializeSetup();
 }
@@ -1969,54 +2034,54 @@ function initializeSetup() {
     const nextSecurity = document.getElementById('nextSecurity');
     const nextGames = document.getElementById('nextGames');
     const finishSetup = document.getElementById('finishSetup');
-    
+
     startSetup.addEventListener('click', () => {
         goToStep('welcomeStep', 'languageStep');
     });
-    
+
     nextLanguage.addEventListener('click', () => {
         const selectedLanguage = document.querySelector('input[name="language"]:checked').value;
         localStorage.setItem('selectedLanguage', selectedLanguage);
         changeLanguage(selectedLanguage);
         goToStep('languageStep', 'securityStep');
     });
-    
+
     nextSecurity.addEventListener('click', () => {
         const pin = document.getElementById('pinInput').value;
         const pinConfirm = document.getElementById('pinConfirm').value;
         const pinHint = document.getElementById('pinHint').value;
         const pinError = document.getElementById('pinError');
-        
+
         if (pin.length !== 4 || !/^\d+$/.test(pin)) {
             pinError.textContent = 'PIN must be 4 digits';
             return;
         }
-        
+
         if (pin !== pinConfirm) {
             pinError.textContent = 'PINs do not match';
             return;
         }
-        
+
         localStorage.setItem('userPin', pin);
         if (pinHint) {
             localStorage.setItem('pinHint', pinHint);
         }
-        
+
         goToStep('securityStep', 'gamesStep');
     });
-    
+
     nextGames.addEventListener('click', () => {
         const selectedGames = [];
         document.querySelectorAll('.game-option input[type="checkbox"]:checked').forEach(checkbox => {
             selectedGames.push(checkbox.value);
         });
-        
+
         localStorage.setItem('selectedGames', JSON.stringify(selectedGames));
-        
+
         // Update summary
         document.getElementById('summaryLanguage').textContent = 
             document.querySelector('input[name="language"]:checked').parentElement.querySelector('label').textContent;
-        
+
         const gamesList = selectedGames.map(game => {
             switch(game) {
                 case 'minecraft': return 'Minecraft';
@@ -2025,12 +2090,12 @@ function initializeSetup() {
                 default: return '';
             }
         }).join(', ') || 'None selected';
-        
+
         document.getElementById('summaryGames').textContent = gamesList;
-        
+
         goToStep('gamesStep', 'finishStep');
     });
-    
+
     finishSetup.addEventListener('click', () => {
         // Install selected games
         const selectedGames = JSON.parse(localStorage.getItem('selectedGames') || '[]');
@@ -2047,17 +2112,17 @@ function initializeSetup() {
                     break;
             }
         });
-        
+
         // Mark setup as complete
         localStorage.setItem('setupComplete', 'true');
-        
+
         // Apply language to desktop elements
         applyLanguageToDesktop();
-        
+
         // Hide setup wizard and show login screen
         document.getElementById('setupWizard').classList.remove('active');
         document.getElementById('loginScreen').classList.add('active');
-        
+
         // Show welcome notification
         showSystemNotification('Welcome to Flux OS!');
     });
@@ -2190,20 +2255,20 @@ function changeLanguage(language) {
             fileExplorer: "Datei-Explorer"
         }
     };
-    
+
     if (!translations[language]) return;
-    
+
     const t = translations[language];
-    
+
     // Update welcome screen
     document.querySelector('#welcomeStep h1').textContent = t.welcome;
     document.querySelector('#welcomeStep p').textContent = t.getStarted;
     document.querySelector('#startSetup').textContent = t.getStarted;
-    
+
     // Update language screen
     document.querySelector('#languageStep h2').textContent = t.chooseLanguage;
     document.querySelector('#nextLanguage').textContent = t.next;
-    
+
     // Update security screen
     document.querySelector('#securityStep h2').textContent = t.setPIN;
     document.querySelector('#securityStep p').textContent = t.pinDescription;
@@ -2211,12 +2276,12 @@ function changeLanguage(language) {
     document.querySelector('#pinConfirm').placeholder = t.confirmPIN;
     document.querySelector('#pinHint').placeholder = t.pinHint;
     document.querySelector('#nextSecurity').textContent = t.next;
-    
+
     // Update games screen
     document.querySelector('#gamesStep h2').textContent = t.chooseGames;
     document.querySelector('#gamesStep p').textContent = t.gamesDescription;
     document.querySelector('#nextGames').textContent = t.next;
-    
+
     // Update finish screen
     document.querySelector('#finishStep h2').textContent = t.setupComplete;
     document.querySelector('#finishStep p').textContent = t.setupReady;
@@ -2225,7 +2290,7 @@ function changeLanguage(language) {
     document.querySelector('.summary-item:nth-child(2) span:last-child').textContent = t.pinProtection;
     document.querySelector('#summaryGames').previousElementSibling.textContent = t.summaryGames;
     document.querySelector('#finishSetup').textContent = t.startFluxOS;
-    
+
     // Store selected language
     localStorage.setItem('selectedLanguage', language);
 }
@@ -2260,15 +2325,15 @@ function applyLanguageToDesktop() {
             fileExplorer: "Datei-Explorer"
         }
     };
-    
+
     const t = translations[language] || translations.en;
-    
+
     // Update search placeholder
     const searchInput = document.getElementById('searchInput');
     if (searchInput) {
         searchInput.placeholder = t.searchWindows;
     }
-    
+
     // Update desktop icons text
     const desktopIcons = document.querySelectorAll('.icon');
     desktopIcons.forEach(icon => {
@@ -2292,20 +2357,20 @@ function resetFileExplorer() {
 function updateFileExplorer(section) {
     const fileContent = document.querySelector('.file-content');
     if (!fileContent) return;
-    
+
     // Clear current content
     fileContent.innerHTML = '';
-    
+
     // Update address bar
     const breadcrumb = document.querySelector('.breadcrumb');
     if (breadcrumb) {
         breadcrumb.innerHTML = '<span>This PC</span><span>&gt;</span>';
     }
-    
+
     if (section === 'documents' || section === 'pictures' || section === 'network') {
         // Show no files message
         breadcrumb.innerHTML += `<span>${section.charAt(0).toUpperCase() + section.slice(1)}</span>`;
-        
+
         const noFilesMessage = document.createElement('div');
         noFilesMessage.className = 'no-files-message';
         noFilesMessage.innerHTML = `
@@ -2319,10 +2384,10 @@ function updateFileExplorer(section) {
     else if (section === 'downloads') {
         // Show downloads section with installed apps
         breadcrumb.innerHTML += '<span>Downloads</span>';
-        
+
         // Get installed apps from localStorage
         const installedApps = JSON.parse(localStorage.getItem('selectedGames') || '[]');
-        
+
         if (installedApps.length === 0) {
             const noAppsMessage = document.createElement('div');
             noAppsMessage.className = 'no-files-message';
@@ -2337,10 +2402,10 @@ function updateFileExplorer(section) {
             installedApps.forEach(app => {
                 const fileItem = document.createElement('div');
                 fileItem.className = 'file-item download-item';
-                
+
                 let appName;
                 let imgSrc;
-                
+
                 switch(app) {
                     case 'minecraft':
                         appName = 'Minecraft';
@@ -2355,17 +2420,17 @@ function updateFileExplorer(section) {
                         imgSrc = '/fnaf_1_logo_by_esoteriques_df2b7us-fullview-2719929492.jpg';
                         break;
                 }
-                
+
                 fileItem.innerHTML = `
                     <img src="${imgSrc}" style="width: 40px; height: 40px;" alt="${appName}">
                     <span>${appName}</span>
                 `;
-                
+
                 // Make the app openable from file explorer
                 fileItem.addEventListener('dblclick', () => {
                     openApp(appName);
                 });
-                
+
                 fileContent.appendChild(fileItem);
             });
         }
@@ -2374,13 +2439,13 @@ function updateFileExplorer(section) {
 
 function initFileExplorer() {
     const sidebarItems = document.querySelectorAll('.sidebar-item');
-    
+
     sidebarItems.forEach(item => {
         item.addEventListener('click', () => {
             const section = item.getAttribute('data-section');
             if (section) {
                 updateFileExplorer(section);
-                
+
                 // Highlight selected section
                 sidebarItems.forEach(si => si.classList.remove('active'));
                 item.classList.add('active');
@@ -2393,13 +2458,13 @@ function initCalculator() {
     const calculatorButtons = document.querySelectorAll('.calc-btn');
     const calcInput = document.getElementById('calcInput');
     const calcHistory = document.getElementById('calcHistory');
-    
+
     let currentInput = '0';
     let currentOperation = null;
     let firstOperand = null;
     let waitingForSecondOperand = false;
     let calculationPerformed = false;
-    
+
     // Process digit input
     function inputDigit(digit) {
         if (waitingForSecondOperand) {
@@ -2416,7 +2481,7 @@ function initCalculator() {
             }
         }
     }
-    
+
     // Handle decimal point
     function inputDecimal() {
         if (waitingForSecondOperand) {
@@ -2424,23 +2489,23 @@ function initCalculator() {
             waitingForSecondOperand = false;
             return;
         }
-        
+
         if (calculationPerformed) {
             currentInput = '0.';
             calculationPerformed = false;
             calcHistory.textContent = '';
             return;
         }
-        
+
         if (!currentInput.includes('.')) {
             currentInput += '.';
         }
     }
-    
+
     // Handle operations
     function handleOperator(operator) {
         const inputValue = parseFloat(currentInput);
-        
+
         if (firstOperand === null) {
             firstOperand = inputValue;
         } else if (currentOperation) {
@@ -2448,10 +2513,10 @@ function initCalculator() {
             currentInput = String(result);
             firstOperand = result;
         }
-        
+
         waitingForSecondOperand = true;
         currentOperation = operator;
-        
+
         // Update history
         let symbol;
         switch(operator) {
@@ -2462,13 +2527,13 @@ function initCalculator() {
         }
         calcHistory.textContent = `${firstOperand} ${symbol}`;
     }
-    
+
     // Calculate result
     function performCalculation() {
         const inputValue = parseFloat(currentInput);
-        
+
         if (isNaN(firstOperand) || isNaN(inputValue)) return 0;
-        
+
         let result;
         switch(currentOperation) {
             case 'add':
@@ -2486,10 +2551,10 @@ function initCalculator() {
             default:
                 return inputValue;
         }
-        
+
         return Math.round(result * 1000000) / 1000000; // Handle precision issues
     }
-    
+
     // Clear calculator
     function resetCalculator() {
         currentInput = '0';
@@ -2498,11 +2563,11 @@ function initCalculator() {
         waitingForSecondOperand = false;
         calcHistory.textContent = '';
     }
-    
+
     // Update display
     function updateDisplay() {
         calcInput.textContent = formatNumber(currentInput);
-        
+
         // Keep display size reasonable
         if (currentInput.length > 12) {
             calcInput.style.fontSize = '24px';
@@ -2512,20 +2577,20 @@ function initCalculator() {
             calcInput.style.fontSize = '32px';
         }
     }
-    
+
     // Format number for display (add commas)
     function formatNumber(num) {
         const parts = num.toString().split('.');
         parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
         return parts.join('.');
     }
-    
+
     // Calculator event listeners
     calculatorButtons.forEach(button => {
         button.addEventListener('click', () => {
             const value = button.getAttribute('data-value');
             const action = button.getAttribute('data-action');
-            
+
             if (value) {
                 if (value === '.') {
                     inputDecimal();
@@ -2561,22 +2626,22 @@ function initCalculator() {
                         handleOperator(action);
                 }
             }
-            
+
             updateDisplay();
         });
     });
-    
+
     // Keyboard support
     document.addEventListener('keydown', (e) => {
         if (!document.getElementById('calculatorWindow').classList.contains('active')) {
             return; // Only process keys when calculator is active
         }
-        
+
         // Prevent default for calculator keys to avoid browser shortcuts
         if (/[\d+\-*/.=]|Enter|Backspace|Escape|Delete/.test(e.key)) {
             e.preventDefault();
         }
-        
+
         if (/\d/.test(e.key)) {
             inputDigit(e.key);
         } else if (e.key === '.') {
@@ -2606,10 +2671,10 @@ function initCalculator() {
         } else if (e.key === '%') {
             currentInput = String(parseFloat(currentInput) / 100);
         }
-        
+
         updateDisplay();
     });
-    
+
     // Initial display
     updateDisplay();
 }

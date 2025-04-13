@@ -275,19 +275,18 @@ body {
     bottom: 40px;
     left: 50%;
     transform: translateX(-50%);
-    width: 0;
+    width: 40px;
     height: 100px;
     background: var(--window-bg);
     border-radius: 4px;
     box-shadow: var(--window-shadow);
-    transition: width 0.3s, opacity 0.3s;
     opacity: 0;
     pointer-events: none;
     padding: 8px;
+    transition: opacity 0.3s;
 }
 
 .volume-slider.active {
-    width: 40px;
     opacity: 1;
     pointer-events: all;
 }
@@ -299,6 +298,7 @@ body {
     border-radius: 2px;
     position: relative;
     margin: 0 auto;
+    cursor: pointer;
 }
 
 .volume-icon, .wifi-icon, .notification-icon {
@@ -2411,4 +2411,34 @@ body {
 .dark-mode .wifi-icon,
 .dark-mode .notification-icon {
     color: white;
+}
+
+.wifi-notification {
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    background-color: white;
+    color: #00a650;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.3s, transform 0.3s;
+    z-index: 2000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.wifi-notification.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.wifi-notification svg {
+    width: 18px;
+    height: 18px;
+    fill: #00a650;
 }
