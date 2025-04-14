@@ -396,7 +396,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 notification.classList.add('wifi-notification');
                 notification.innerHTML = `
                     <svg viewBox="0 0 24 24">
-                        <path d="M12,21L15.6,16.2C14.6,15.45 13.35,15 12,15C10.65,15 9.4,15.45 8.4,16.2L12,21M12,3C7.95,3 4.21,4.34 1.2,6.6L3,9C5.5,7.12 8.62,6 12,6C15.38,6 18.5,7.12 21,9L22.8,6.6C19.79,4.34 16.05,3 12,3M12,9C9.3,9 6.81,9.89 4.8,11.4L6.6,13.8C8.1,12.67 9.97,12 12,12C14.03,12 15.9,12.67 17.4,13.8L19.2,11.4C17.19,9.89 14.7,9 12,9Z"/>
+                        <path d="M12,21L15.6,16.2C14.6,15.45 13.35,15 12,15C10.65,15 9.4,15.45 8.4,16.2L12,21M12,3C7.95,3 4.21,4.34 1.2,6.6L3,9C5.5,7.12 8.62,6 12,6C15.38,6 18.5,7.12 21,9L22.8,6.6C19.79,4.34 16.05,3 12,3M12,9C9.3,9 6.81,9.89 4.8,11.4L6.6,13.8C8.1,12.67 9.97,12 12,12C14.03,12 15.9,12.67 17.4,13.8L19.2,11.4C17.19,9.89 14.7,9 12,9M6,9.12C7.47,9.67 9.61,10 12,10C14.39,10 16.53,9.67 18,9.12V12.41C17.38,12.18 16.64,12 15.85,12C13.18,12 11.87,13.6 10.42,15.36C9.38,16.67 8.88,17 7.65,17C6.09,17 6,15.37 6,15.37V9.12M18,14.09V16C18,16.65 16.17,18 12,18C7.83,18 6,16.65 6,16V15.36C6.64,15.67 7.14,15.91 8.08,15.91C9.89,15.91 10.56,15.28 11.89,13.6C13.16,12 14.23,10 16.15,10C16.83,10 17.45,10.03 18,10.09V14.09Z" fill="currentColor"/>
                     </svg>
                     <span>Connected to WiFi - Connection is secure</span>
                 `;
@@ -1095,9 +1095,22 @@ function initUserMenu() {
                 if (loginPassword.value === userPin) {
                     hideLoginScreen();
                 } else {
-                    const pinHint = localStorage.getItem('pinHint');
-                    showSystemNotification(pinHint ? `Incorrect PIN. Hint: ${pinHint}` : 'Incorrect PIN');
+                    // Show error message in a notification
+                    showSystemNotification('Incorrect password. Please try again.');
+                    // Clear the password field
                     loginPassword.value = '';
+                    // Add shake animation to password field
+                    loginPassword.classList.add('shake');
+                    setTimeout(() => {
+                        loginPassword.classList.remove('shake');
+                    }, 500);
+                    // Show hint if available
+                    const pinHint = localStorage.getItem('pinHint');
+                    if (pinHint) {
+                        setTimeout(() => {
+                            showSystemNotification(`Hint: ${pinHint}`);
+                        }, 1000);
+                    }
                 }
             }
         });
@@ -1624,7 +1637,7 @@ function initContextMenu() {
             <div class="context-menu-separator"></div>
             <div class="context-menu-item" id="displaySettingsMenuItem">
                 <svg viewBox="0 0 24 24">
-                    <path d="M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M12,10A2,2 0 0,1 14,12A2,2 0 0,1 12,14A2,2 0 0,1 10,12A2,2 0 0,1 12,10M12,4A2,2 0 0,1 14,6A2,2 0 0,1 12,8A2,2 0 0,1 10,6A2,2 0 0,1 12,4Z" fill="currentColor"/>
+                    <path d="M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M12,10A2,2 0 0,1 14,12A2,2 0 0,1 12,14A2,2 0 0,1 10,12A2,2 0 0,1 12,10M3,5H1V21A2,2 0 0,0 3,23H19A2,2 0 0,0 21,21V5L3,5Z" fill="currentColor"/>
                 </svg>
                 <span>Display settings</span>
             </div>
