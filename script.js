@@ -417,9 +417,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Initialize Quick Settings
         initQuickSettings();
-
-        // Initialize news feed
-        loadNews();
     } catch (error) {
         console.error('Initialization error:', error);
         showSystemNotification('An error occurred during page load');
@@ -2796,81 +2793,5 @@ function initQuickSettings() {
     const bluetoothToggle = document.getElementById('bluetoothToggle');
     if (bluetoothToggle) {
         bluetoothToggle.classList.add('active');
-    }
-}
-
-function loadNews() {
-    const newsItemsContainer = document.getElementById('newsItems');
-    const newsRefresh = document.querySelector('.news-refresh');
-    
-    // Sample news data (in a real app, this would come from an API)
-    const newsData = [
-        {
-            title: "New AI Research Breakthrough Promises More Efficient Computing",
-            source: "Tech Daily",
-            image: "https://images.unsplash.com/photo-1677442135429-6874d4e284d4?w=200&auto=format"
-        },
-        {
-            title: "Global Climate Conference Sets New Emission Reduction Targets",
-            source: "World News",
-            image: "https://images.unsplash.com/photo-1619551734325-81aaf323686c?w=200&auto=format"
-        },
-        {
-            title: "Researchers Discover Potential Breakthrough in Renewable Energy Storage",
-            source: "Science Today",
-            image: "https://images.unsplash.com/photo-1497435334941-8c899ee9e8e9?w=200&auto=format"
-        },
-        {
-            title: "New Space Telescope Captures Stunning Images of Distant Galaxies",
-            source: "Space Exploration",
-            image: "https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=200&auto=format"
-        },
-        {
-            title: "Global Economic Forum Predicts Steady Growth Despite Challenges",
-            source: "Financial Times",
-            image: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=200&auto=format"
-        }
-    ];
-    
-    // Function to render news items
-    function renderNews() {
-        newsItemsContainer.innerHTML = '';
-        
-        // Create a shuffled copy of the news array to randomize display
-        const shuffledNews = [...newsData].sort(() => 0.5 - Math.random());
-        
-        // Display the first 4 news items
-        shuffledNews.slice(0, 4).forEach(news => {
-            const newsItem = document.createElement('div');
-            newsItem.className = 'news-item';
-            
-            newsItem.innerHTML = `
-                <img src="${news.image}" alt="${news.title}" class="news-image">
-                <div class="news-content">
-                    <div class="news-title">${news.title}</div>
-                    <div class="news-source">${news.source}</div>
-                </div>
-            `;
-            
-            // Add click event to open the news (simulated)
-            newsItem.addEventListener('click', () => {
-                showSystemNotification(`Opening: ${news.title}`);
-                document.getElementById('startMenu').classList.remove('active');
-            });
-            
-            newsItemsContainer.appendChild(newsItem);
-        });
-    }
-    
-    // Initial news load
-    renderNews();
-    
-    // Add refresh capability
-    if (newsRefresh) {
-        newsRefresh.addEventListener('click', (e) => {
-            e.stopPropagation();
-            renderNews();
-            showSystemNotification('News refreshed');
-        });
     }
 }
