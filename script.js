@@ -414,6 +414,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 }, 3000);
             });
         }
+
+        // Initialize Quick Settings
+        initQuickSettings();
+
+        // Initialize news feed
+        loadNews();
     } catch (error) {
         console.error('Initialization error:', error);
         showSystemNotification('An error occurred during page load');
@@ -1254,7 +1260,7 @@ function showLoginPowerMenu() {
         </div>
         <div class="login-popup-item" id="loginSleep">
             <svg viewBox="0 0 24 24">
-                <path d="M19,7H11V13H19V7M21,5V19A2,2 0 0,1 19,21H5A2,2 0 0,1 3,19V5A2,2 0 0,1 5,3H19A2,2 0 0,1 21,5M3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5L3,5Z" fill="currentColor"/>
+                <path d="M19,7H11V13H19V7M21,5V19A2,2 0 0,1 19,21H5A2,2 0 0,1 3,19V5A2,2 0 0,1 5,3H19A2,2 0 0,1 21,5M3,5V19A2,2 0 0,1 5,21H19A2,2 0 0,1 21,19V5L3,5Z" fill="currentColor"/>
             </svg>
             <span>Sleep</span>
         </div>
@@ -1623,7 +1629,7 @@ function initContextMenu() {
         menu.innerHTML = `
             <div class="context-menu-item" id="refreshMenuItem">
                 <svg viewBox="0 0 24 24">
-                    <path d="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z" fill="currentColor"/>
+                    <path d="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,1 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z" fill="currentColor"/>
                 </svg>
                 <span>Refresh</span>
             </div>
@@ -2695,3 +2701,176 @@ function initCalculator() {
 document.addEventListener('DOMContentLoaded', () => {
     initCalculator();
 });
+
+function initQuickSettings() {
+    const quickSettingsButton = document.getElementById('quickSettingsButton');
+    const quickSettingsPanel = document.getElementById('quickSettingsPanel');
+    
+    // Toggle quick settings panel
+    quickSettingsButton.addEventListener('click', () => {
+        quickSettingsPanel.classList.toggle('active');
+    });
+    
+    // Close panel when clicking elsewhere
+    document.addEventListener('click', (e) => {
+        if (!quickSettingsPanel.contains(e.target) && !quickSettingsButton.contains(e.target)) {
+            quickSettingsPanel.classList.remove('active');
+        }
+    });
+    
+    // Initialize setting toggles
+    const toggleSettings = ['wifiToggle', 'bluetoothToggle', 'dndToggle', 'airplaneToggle'];
+    toggleSettings.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.addEventListener('click', () => {
+                element.classList.toggle('active');
+                const status = element.querySelector('.quick-setting-status');
+                if (status) {
+                    status.textContent = element.classList.contains('active') ? 'On' : 'Off';
+                }
+                
+                // Show notification
+                const settingName = element.querySelector('.quick-setting-text span:first-child').textContent;
+                showSystemNotification(`${settingName}: ${element.classList.contains('active') ? 'On' : 'Off'}`);
+            });
+        }
+    });
+    
+    // Brightness slider
+    const brightnessSlider = document.getElementById('brightnessSlider');
+    if (brightnessSlider) {
+        // Load saved brightness
+        const savedBrightness = localStorage.getItem('brightness');
+        if (savedBrightness) {
+            brightnessSlider.value = savedBrightness;
+        }
+        
+        brightnessSlider.addEventListener('input', (e) => {
+            const brightness = e.target.value;
+            document.documentElement.style.filter = `brightness(${brightness / 100})`;
+            localStorage.setItem('brightness', brightness);
+        });
+    }
+    
+    // Volume slider
+    const volumeQuickSlider = document.getElementById('volumeQuickSlider');
+    if (volumeQuickSlider) {
+        // Load saved volume
+        const savedVolume = localStorage.getItem('volume');
+        if (savedVolume) {
+            volumeQuickSlider.value = savedVolume;
+        }
+        
+        volumeQuickSlider.addEventListener('input', (e) => {
+            const volume = e.target.value;
+            localStorage.setItem('volume', volume);
+            
+            // Update volume icon
+            const volumeIcon = document.querySelector('.volume-icon svg path');
+            if (volumeIcon) {
+                if (volume < 30) {
+                    volumeIcon.setAttribute('d', 'M7,9V15H11L16,20V4L11,9H7Z');
+                } else if (volume < 70) {
+                    volumeIcon.setAttribute('d', 'M5,9V15H9L14,20V4L9,9H5M18.5,12C18.5,10.23 17.5,8.71 16,7.97V16C17.5,15.29 18.5,13.76 18.5,12Z');
+                } else {
+                    volumeIcon.setAttribute('d', 'M14,3.23V5.29C16.89,6.15 19,8.83 19,12C19,15.17 16.89,17.84 14,18.7V20.77C18,19.86 21,16.28 21,12C21,7.72 18,4.14 14,3.23M16.5,12C16.5,10.23 15.5,8.71 14,7.97V16C15.5,15.29 16.5,13.76 16.5,12M3,9V15H7L12,20V4L7,9H3Z');
+                }
+            }
+            
+            // Also update the volumeSliderInner for the taskbar volume control
+            const volumeSliderInner = document.getElementById('volumeSliderInner');
+            if (volumeSliderInner) {
+                volumeSliderInner.style.height = `${volume}%`;
+            }
+        });
+    }
+    
+    // Set initial active state for WiFi
+    const wifiToggle = document.getElementById('wifiToggle');
+    if (wifiToggle) {
+        wifiToggle.classList.add('active');
+    }
+    
+    // Set initial active state for Bluetooth
+    const bluetoothToggle = document.getElementById('bluetoothToggle');
+    if (bluetoothToggle) {
+        bluetoothToggle.classList.add('active');
+    }
+}
+
+function loadNews() {
+    const newsItemsContainer = document.getElementById('newsItems');
+    const newsRefresh = document.querySelector('.news-refresh');
+    
+    // Sample news data (in a real app, this would come from an API)
+    const newsData = [
+        {
+            title: "New AI Research Breakthrough Promises More Efficient Computing",
+            source: "Tech Daily",
+            image: "https://images.unsplash.com/photo-1677442135429-6874d4e284d4?w=200&auto=format"
+        },
+        {
+            title: "Global Climate Conference Sets New Emission Reduction Targets",
+            source: "World News",
+            image: "https://images.unsplash.com/photo-1619551734325-81aaf323686c?w=200&auto=format"
+        },
+        {
+            title: "Researchers Discover Potential Breakthrough in Renewable Energy Storage",
+            source: "Science Today",
+            image: "https://images.unsplash.com/photo-1497435334941-8c899ee9e8e9?w=200&auto=format"
+        },
+        {
+            title: "New Space Telescope Captures Stunning Images of Distant Galaxies",
+            source: "Space Exploration",
+            image: "https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=200&auto=format"
+        },
+        {
+            title: "Global Economic Forum Predicts Steady Growth Despite Challenges",
+            source: "Financial Times",
+            image: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=200&auto=format"
+        }
+    ];
+    
+    // Function to render news items
+    function renderNews() {
+        newsItemsContainer.innerHTML = '';
+        
+        // Create a shuffled copy of the news array to randomize display
+        const shuffledNews = [...newsData].sort(() => 0.5 - Math.random());
+        
+        // Display the first 4 news items
+        shuffledNews.slice(0, 4).forEach(news => {
+            const newsItem = document.createElement('div');
+            newsItem.className = 'news-item';
+            
+            newsItem.innerHTML = `
+                <img src="${news.image}" alt="${news.title}" class="news-image">
+                <div class="news-content">
+                    <div class="news-title">${news.title}</div>
+                    <div class="news-source">${news.source}</div>
+                </div>
+            `;
+            
+            // Add click event to open the news (simulated)
+            newsItem.addEventListener('click', () => {
+                showSystemNotification(`Opening: ${news.title}`);
+                document.getElementById('startMenu').classList.remove('active');
+            });
+            
+            newsItemsContainer.appendChild(newsItem);
+        });
+    }
+    
+    // Initial news load
+    renderNews();
+    
+    // Add refresh capability
+    if (newsRefresh) {
+        newsRefresh.addEventListener('click', (e) => {
+            e.stopPropagation();
+            renderNews();
+            showSystemNotification('News refreshed');
+        });
+    }
+}
