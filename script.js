@@ -453,6 +453,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     `;
     document.head.appendChild(style);
+
+    // Initialize Terminal
+    initTerminal();
 });
 
 async function fetchWeatherInfo() {
@@ -542,6 +545,14 @@ function openApp(appName) {
                 break;
             case 'Calculator':
                 safeActivateWindow('calculatorWindow', '.taskbar-icon img[alt="Calculator"]');
+                break;
+            case 'Terminal':
+                safeActivateWindow('terminalWindow', '.taskbar-icon svg[d*="M20,19V7H4V19H20M20,3A2,2 0 0,1 22,5V19A2,2"]');
+                // Focus terminal input when opened
+                setTimeout(() => {
+                    const terminalInput = document.getElementById('terminalInput');
+                    if (terminalInput) terminalInput.focus();
+                }, 100);
                 break;
             case 'Store':
                 safeActivateWindow('storeWindow', '.taskbar-icon svg[d*="3,5H9V11H3V5M5,7V9H7V7H5M11,7H21V9H11V7"]');
@@ -1245,7 +1256,7 @@ function showLoginPowerMenu() {
     menu.innerHTML = `
         <div class="login-popup-item" id="loginShutdown">
             <svg viewBox="0 0 24 24">
-                <path d="M13,3H11V13H13V3M17.83,5.17L16.41,6.59C17.99,7.86 19,9.81 19,12C19,15.17 16.89,17.84 14,18.7V20.77C18,19.86 21,16.28 21,12C21,7.72 18,4.14 14,3.23M16.5,12C16.5,10.23 15.5,8.71 14,7.97V16C15.5,15.29 16.5,13.76 16.5,12M3,9V15H7L12,20V4L7,9H3Z" fill="currentColor"/>
+                <path d="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,1 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z" fill="currentColor"/>
             </svg>
             <span>Shut down</span>
         </div>
@@ -1379,7 +1390,14 @@ function addAppToDesktop(appName, svgPath) {
     } else if (appName === 'GameHub') {
         appIcon.innerHTML = `
             <svg viewBox="0 0 24 24" class="icon-svg">
-                <path d="M21,6H3C1.9,6 1,6.9 1,8V16C1,17.1 1.9,18 3,18H21C22.1,18 23,17.1 23,16V8C23,6.9 22.1,6 21,6M21,16H3V8H21V16M6,15H8V13H10V11H8V9H6V11H4V13H6V15M14.5,12A1.5,1.5 0 0,1 16,13.5A1.5,1.5 0 0,1 14.5,15A1.5,1.5 0 0,1 13,13.5A1.5,1.5 0 0,1 14.5,12M18.5,9A1.5,1.5 0 0,1 20,10.5A1.5,1.5 0 0,1 18.5,12A1.5,1.5 0 0,1 17,10.5A1.5,1.5 0 0,1 18.5,9Z" fill="#4CAF50"/>
+                <path d="M21,6H3C1.9,6 1,6.9 1,8V16C1,17.1 1.9,18 3,18H21C22.1,18 23,17.1 23,16V8C23,6.9 22.1,6 21,6M21,16H3V8H21V16M18,14V12H6V14H18Z" fill="#4CAF50"/>
+            </svg>
+            <span>${appName}</span>
+        `;
+    } else if (appName === 'Terminal') {
+        appIcon.innerHTML = `
+            <svg viewBox="0 0 24 24" class="icon-svg">
+                <path d="M20,19V7H4V19H20M20,3A2,2 0 0,1 22,5V19A2,2 0 0,1 20,21H4A2,2 0 0,1 2,19V5C2,3.89 3.9,3 4,3H20M13,17V15H18V17H13M9.58,13L5.57,9H8.4L11.7,12.3C12.09,12.69 12.09,13.33 11.7,13.72L8.42,17H5.59L9.58,13Z" fill="#0078D7"/>
             </svg>
             <span>${appName}</span>
         `;
@@ -1633,7 +1651,7 @@ function initContextMenu() {
             <div class="context-menu-separator"></div>
             <div class="context-menu-item" id="newMenuItem">
                 <svg viewBox="0 0 24 24">
-                    <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" fill="currentColor"/>
+                    <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13M18,14V16C18,16.65 16.17,18 12,18C7.83,18 6,16.65 6,16V15.36C6.64,15.67 7.14,15.91 8.08,15.91C9.89,15.91 10.56,15.28 11.89,13.6C13.16,12 14.23,10 16.15,10C16.83,10 17.45,10.03 18,10.09V14.09Z" fill="currentColor"/>
                 </svg>
                 <span>New</span>
             </div>
@@ -1646,7 +1664,7 @@ function initContextMenu() {
             </div>
             <div class="context-menu-item" id="personalizeMenuItem">
                 <svg viewBox="0 0 24 24">
-                    <path d="M12,16A2,2 0 0,1 14,18A2,2 0 0,1 12,20A2,2 0 0,1 10,18A2,2 0 0,1 12,16M12,10A2,2 0 0,1 14,12A2,2 0 0,1 12,14A2,2 0 0,1 10,12A2,2 0 0,1 12,10M12,4A2,2 0 0,1 14,6A2,2 0 0,1 12,8A2,2 0 0,1 10,6A2,2 0 0,1 12,4Z" fill="currentColor"/>
+                    <path d="M12,16A2,2 0 0,1 14,18A2,2 0 0,1 12,20A2,2 0 0,1 10,18A2,2 0 0,1 12,16M12,10A2,2 0 0,1 14,12A2,2 0 0,1 12,14A2,2 0 0,1 10,12A2,2 0 0,1 12,10M6,9.12C7.47,9.67 9.61,10 12,10C14.39,10 16.53,9.67 18,9.12V12.41C17.38,12.18 16.64,12 15.85,12C13.18,12 11.87,13.6 10.42,15.36C9.38,16.67 8.88,17 7.65,17C6.09,17 6,15.37 6,15.37V9.12M18,14.09V16C18,16.65 16.17,18 12,18C7.83,18 6,16.65 6,16V15.36C6.64,15.67 7.14,15.91 8.08,15.91C9.89,15.91 10.56,15.28 11.89,13.6C13.16,12 14.23,10 16.15,10C16.83,10 17.45,10.03 18,10.09V14.09Z" fill="currentColor"/>
                 </svg>
                 <span>Personalize</span>
             </div>
@@ -2698,6 +2716,327 @@ function initCalculator() {
 document.addEventListener('DOMContentLoaded', () => {
     initCalculator();
 });
+
+function initTerminal() {
+    const terminalInput = document.getElementById('terminalInput');
+    const terminalOutput = document.getElementById('terminalOutput');
+    
+    if (!terminalInput || !terminalOutput) return;
+    
+    // Add Terminal icon to desktop
+    addAppToDesktop("Terminal", '<path d="M20,19V7H4V19H20M20,3A2,2 0 0,1 22,5V19A2,2 0 0,1 20,21H4A2,2 0 0,1 2,19V5C2,3.89 3.9,3 4,3H20M13,17V15H18V17H13M9.58,13L5.57,9H8.4L11.7,12.3C12.09,12.69 12.09,13.33 11.7,13.72L8.42,17H5.59L9.58,13Z" fill="#0078D7"/>');
+
+    // System variables
+    let currentDir = '/home/user';
+    const fileSystem = {
+        '/': {
+            type: 'dir',
+            contents: {
+                'home': {
+                    type: 'dir',
+                    contents: {
+                        'user': {
+                            type: 'dir',
+                            contents: {
+                                'documents': {
+                                    type: 'dir',
+                                    contents: {
+                                        'readme.txt': {
+                                            type: 'file',
+                                            content: 'Welcome to Flux OS Terminal!\nThis is a simple text file.'
+                                        }
+                                    }
+                                },
+                                'desktop': {
+                                    type: 'dir',
+                                    contents: {}
+                                },
+                                'downloads': {
+                                    type: 'dir',
+                                    contents: {}
+                                },
+                                '.config': {
+                                    type: 'dir',
+                                    contents: {}
+                                },
+                                'hello.txt': {
+                                    type: 'file',
+                                    content: 'Hello, world!'
+                                }
+                            }
+                        }
+                    }
+                },
+                'usr': {
+                    type: 'dir',
+                    contents: {
+                        'bin': { type: 'dir', contents: {} }
+                    }
+                },
+                'etc': { type: 'dir', contents: {} },
+                'var': { type: 'dir', contents: {} }
+            }
+        }
+    };
+
+    // Available commands
+    const commands = {
+        help: {
+            description: 'Display available commands',
+            execute: () => {
+                let output = 'Available commands:\n\n';
+                for (const cmd in commands) {
+                    output += `${cmd.padEnd(10)} - ${commands[cmd].description}\n`;
+                }
+                return { success: true, output };
+            }
+        },
+        ls: {
+            description: 'List directory contents',
+            execute: (args) => {
+                const path = args[0] || currentDir;
+                const dirObj = getPathObject(path);
+                
+                if (!dirObj || dirObj.type !== 'dir') {
+                    return { success: false, output: `ls: cannot access '${path}': No such directory` };
+                }
+                
+                let output = '';
+                for (const item in dirObj.contents) {
+                    const isDir = dirObj.contents[item].type === 'dir';
+                    output += `${isDir ? 'dir' : 'file'} ${item}${isDir ? '/' : ''}\n`;
+                }
+                return { success: true, output };
+            }
+        },
+        cd: {
+            description: 'Change directory',
+            execute: (args) => {
+                if (!args[0]) {
+                    currentDir = '/home/user';
+                    return { success: true, output: '' };
+                }
+                
+                const targetPath = getAbsolutePath(args[0]);
+                const dirObj = getPathObject(targetPath);
+                
+                if (!dirObj) {
+                    return { success: false, output: `cd: no such directory: ${args[0]}` };
+                }
+                
+                if (dirObj.type !== 'dir') {
+                    return { success: false, output: `cd: not a directory: ${args[0]}` };
+                }
+                
+                currentDir = targetPath;
+                return { success: true, output: '' };
+            }
+        },
+        pwd: {
+            description: 'Print working directory',
+            execute: () => {
+                return { success: true, output: currentDir };
+            }
+        },
+        echo: {
+            description: 'Display a line of text',
+            execute: (args) => {
+                return { success: true, output: args.join(' ') };
+            }
+        },
+        cat: {
+            description: 'Concatenate and display file content',
+            execute: (args) => {
+                if (!args[0]) {
+                    return { success: false, output: 'cat: missing file operand' };
+                }
+                
+                const path = getAbsolutePath(args[0]);
+                const fileObj = getPathObject(path);
+                
+                if (!fileObj) {
+                    return { success: false, output: `cat: ${args[0]}: No such file or directory` };
+                }
+                
+                if (fileObj.type !== 'file') {
+                    return { success: false, output: `cat: ${args[0]}: Is a directory` };
+                }
+                
+                return { success: true, output: fileObj.content };
+            }
+        },
+        mkdir: {
+            description: 'Create a directory',
+            execute: (args) => {
+                if (!args[0]) {
+                    return { success: false, output: 'mkdir: missing operand' };
+                }
+                
+                const path = getAbsolutePath(args[0]);
+                const parentPath = path.substring(0, path.lastIndexOf('/'));
+                const dirName = path.substring(path.lastIndexOf('/') + 1);
+                
+                if (!dirName) {
+                    return { success: false, output: 'mkdir: invalid directory name' };
+                }
+                
+                const parentObj = getPathObject(parentPath);
+                
+                if (!parentObj || parentObj.type !== 'dir') {
+                    return { success: false, output: `mkdir: cannot create directory '${args[0]}': No such file or directory` };
+                }
+                
+                if (parentObj.contents[dirName]) {
+                    return { success: false, output: `mkdir: cannot create directory '${args[0]}': File exists` };
+                }
+                
+                parentObj.contents[dirName] = { type: 'dir', contents: {} };
+                return { success: true, output: '' };
+            }
+        },
+        touch: {
+            description: 'Create an empty file',
+            execute: (args) => {
+                if (!args[0]) {
+                    return { success: false, output: 'touch: missing file operand' };
+                }
+                
+                const path = getAbsolutePath(args[0]);
+                const parentPath = path.substring(0, path.lastIndexOf('/'));
+                const fileName = path.substring(path.lastIndexOf('/') + 1);
+                
+                if (!fileName) {
+                    return { success: false, output: 'touch: invalid file name' };
+                }
+                
+                const parentObj = getPathObject(parentPath);
+                
+                if (!parentObj || parentObj.type !== 'dir') {
+                    return { success: false, output: `touch: cannot touch '${args[0]}': No such file or directory` };
+                }
+                
+                if (!parentObj.contents[fileName]) {
+                    parentObj.contents[fileName] = { type: 'file', content: '' };
+                }
+                
+                return { success: true, output: '' };
+            }
+        },
+        clear: {
+            description: 'Clear the terminal screen',
+            execute: () => {
+                terminalOutput.innerHTML = '';
+                return { success: true, output: '' };
+            }
+        },
+        date: {
+            description: 'Display the current date and time',
+            execute: () => {
+                return { success: true, output: new Date().toString() };
+            }
+        },
+        uname: {
+            description: 'Print system information',
+            execute: () => {
+                return { success: true, output: 'FluxOS 1.0' };
+            }
+        },
+        whoami: {
+            description: 'Print current user',
+            execute: () => {
+                return { success: true, output: 'user' };
+            }
+        }
+    };
+
+    // Helper function to get absolute path
+    function getAbsolutePath(path) {
+        if (path.startsWith('/')) return path;
+        
+        let current = currentDir;
+        
+        if (path === '..') {
+            return current.substring(0, current.lastIndexOf('/')) || '/';
+        }
+        
+        if (path === '.') return current;
+        
+        const parts = path.split('/');
+        
+        for (const part of parts) {
+            if (part === '') continue;
+            if (part === '.') continue;
+            if (part === '..') {
+                current = current.substring(0, current.lastIndexOf('/')) || '/';
+            } else {
+                current = current === '/' ? `/${part}` : `${current}/${part}`;
+            }
+        }
+        
+        return current;
+    }
+
+    // Helper function to get object at path
+    function getPathObject(path) {
+        if (path === '/') return fileSystem['/'];
+        
+        const parts = path.split('/').filter(p => p);
+        let current = fileSystem['/'];
+        
+        for (const part of parts) {
+            if (!current.contents[part]) return null;
+            current = current.contents[part];
+        }
+        
+        return current;
+    }
+
+    // Handle terminal input
+    terminalInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            
+            const input = terminalInput.value.trim();
+            terminalInput.value = '';
+            
+            // Display the command
+            const commandLine = document.createElement('div');
+            commandLine.className = 'command-line';
+            commandLine.innerHTML = `<span class="terminal-prompt">user@fluxos:~$</span> <span class="command-text">${input}</span>`;
+            terminalOutput.appendChild(commandLine);
+            
+            if (input) {
+                const parts = input.split(' ');
+                const cmd = parts[0].toLowerCase();
+                const args = parts.slice(1);
+                
+                if (commands[cmd]) {
+                    const result = commands[cmd].execute(args);
+                    
+                    if (result.output) {
+                        const outputElement = document.createElement('div');
+                        outputElement.className = result.success ? 'success-text' : 'error-text';
+                        outputElement.textContent = result.output;
+                        terminalOutput.appendChild(outputElement);
+                    }
+                } else {
+                    const errorElement = document.createElement('div');
+                    errorElement.className = 'error-text';
+                    errorElement.textContent = `Command not found: ${cmd}`;
+                    terminalOutput.appendChild(errorElement);
+                }
+            }
+            
+            // Auto-scroll to bottom
+            terminalOutput.scrollTop = terminalOutput.scrollHeight;
+        }
+    });
+
+    // Focus terminal input when terminal window is active
+    document.getElementById('terminalWindow').addEventListener('click', () => {
+        terminalInput.focus();
+    });
+}
 
 function initQuickSettings() {
     const quickSettingsButton = document.getElementById('quickSettingsButton');
